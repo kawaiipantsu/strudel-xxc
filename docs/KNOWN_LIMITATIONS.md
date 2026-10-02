@@ -1,5 +1,7 @@
 # Practical boundaries
 
+- Allow background music keeps Strudel playing across tab switches using audio-clock scheduling and the available browser playback policy. Safari/mobile power management, screen locking and OS suspension can still interrupt it; no website can guarantee playback after its process is suspended.
+
 - MIDI input/output/clock and microphone behavior depend on browser permissions and actual devices. Browser automation verifies the software path; it cannot certify a physical audio interface or instrument.
 - WebSerial is detected and the official module is included, but opaque-origin browser restrictions may prevent native access. No serial bridge is installed.
 - OSC needs a separate bridge. The official package defaults to a localhost WebSocket, which is not a production HTTPS bridge. The studio shows this state explicitly.

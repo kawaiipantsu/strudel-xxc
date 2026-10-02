@@ -52,6 +52,8 @@ Inline sliders use Strudel’s own widget state. The editor retains mini-notatio
 5. **MIDI scheduling:** the published `@strudel/midi` 1.3.0 bundle inlines a second AudioContext in its timer helpers. Chromium leaves that context suspended when it is created from a scheduler callback, so note/clock messages never fire. A checked Vite transform replaces that private getter with the official shared `getAudioContext` already imported by the package. Only the timer context reference changes; the official MIDI implementation remains in use. Bridge timestamps are translated between frame/host performance time origins.
 6. **MIDI permission:** the trusted host requests non-SysEx permission; a small Web MIDI facade gives the official Strudel module access to explicitly connected ports. All outgoing messages are checked by the host.
 
+7. **Background playback clock:** the existing Strudel `setInterval` / `clearInterval` options receive AudioWorklet wakeups instead of page timers. Pattern queries, lookahead, tempo and scheduling remain in upstream Cyclist. The clock is connected only while the scheduler runs; it produces zero-valued output and leaves the SuperDough signal path unchanged. The optional browser Audio Session API declares playback intent. Details and browser limits are in [Audio engine](AUDIO_ENGINE.md#background-music).
+
 ## Samples and optional integrations
 
 The default sample bank is original, deterministic, CC0 synthesis. No third-party sample collection or font bank is automatically downloaded. `samples()`, custom maps, wavetables and `loadSoundfont()` retain the official APIs. External resources need HTTPS and host CORS permission.

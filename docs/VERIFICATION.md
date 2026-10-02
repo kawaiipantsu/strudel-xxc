@@ -2,7 +2,7 @@
 
 Application: **https://strudel.xxc.dk**
 
-Frontend build: **ec1e863abf71**
+Frontend build: **0dd550dc6dde**
 
 Test command: `./scripts/test.sh`
 
@@ -14,12 +14,12 @@ Test command: `./scripts/test.sh`
 | PHP syntax checks for backend, public entry points and scripts | Pass |
 | PCM editing/encoding unit tests | 4 passed |
 | HTTPS backend integration checks | 52 passed |
-| Browser end-to-end tests | 14 passed, 7 each in Chromium and WebKit |
+| Browser end-to-end tests | 16 passed, 8 each in Chromium and WebKit |
 | `npm audit --omit=dev` | 0 vulnerabilities reported |
 | Database, Redis, storage, FFmpeg and SVG renderer health | Ready |
 | Public ownership and private credential permissions | Verified |
 
-The browser suite completed in 40.2 seconds without retries. Tests use the Playwright 1.63.0 browser versions and the deployed HTTPS origin. Initial development also used the host's system Chromium. Linux WebKit does not reproduce every Safari/iOS hardware configuration.
+The browser suite completed in 55.0 seconds without retries. Tests use the Playwright 1.63.0 browser versions and the deployed HTTPS origin. Initial development also used the host's system Chromium. Linux WebKit does not reproduce every Safari/iOS hardware configuration.
 
 ## What the browser tests measure
 
@@ -35,6 +35,12 @@ The browser suite completed in 40.2 seconds without retries. Tests use the Playw
 - Admin sign-in/out, settings persistence, moderation and diagnostic panels. Credential entry is excluded from traces/screenshots.
 
 The checked MIDI compatibility transform fixes a suspended private AudioContext embedded in the published MIDI timer helpers. The WebKit transform handles a zero reported maximum output channel count. Both are documented in [Strudel integration](STRUDEL_INTEGRATION.md).
+
+## Background playback and social cards
+
+The added browser test verifies the persisted background-music preference, audio beyond the scheduler lookahead window while document visibility is hidden and ordinary page interval callbacks are blocked, intentional Hush when the preference is off, and no restart after Hush/return. Both Chromium and WebKit capture non-silent Float32 PCM at 1, 1.5, 2 and 2.5 seconds under that condition. This models hidden-page visibility and throttling; it does not certify native Safari/iOS background execution, screen locking or OS suspension. The desktop automation harness forces visibility, so it is not used as evidence of an actual minimized-window test.
+
+Live HTTPS checks verify `og:site_name` on the studio, library and a public project, plus the 1200×630 PNG response. The regenerated social image was visually inspected for correct lettering and the Open Studio call to action. The new image URL avoids reusing the original raster URL in new cards. Running the graphics generator twice produces byte-identical assets.
 
 ## Backend coverage
 

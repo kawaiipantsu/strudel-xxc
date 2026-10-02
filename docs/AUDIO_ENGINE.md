@@ -18,6 +18,18 @@ The implementation does not substitute a small oscillator engine for Strudel. Mi
 
 AudioContext creation is lazy in upstream code. Play/Evaluate resumes it after user activation and loads official worklets. Safari may require a second click directly in the editor frame. Hush stops the scheduler and suspends audio, including effects. Loading a shared score never calls evaluation or autoplay.
 
+## Background music
+
+Open **Preferences → Audio / Background Playback → Allow background music**. The setting is on by default and persists in this browser. Turn it off to hush when the studio tab becomes hidden or the browser is minimized. That also finishes an active recording; returning to the tab does not restart it. The command palette includes **Audio: Toggle Background Music**.
+
+Background mode keeps the current Strudel scheduler running. An AudioWorklet supplies the official scheduler's `setInterval` / `clearInterval` hooks with wakeups from the audio clock, so it does not depend on throttled window timers or animation frames. It does not replace Strudel's pattern scheduler. Orbit routing continues on scheduler wakeups; visual rendering and analyser messages stop while hidden. Hush disconnects the clock node and suspends the audio context.
+
+Where supported, `navigator.audioSession.type = "playback"` declares music playback to Safari. The host also supplies Media Session title/artist metadata and system Pause/Stop handlers. These APIs are feature-detected; no browser policy is bypassed. If the browser interrupts an active context, returning to the studio attempts to resume that same context, with an Enable Audio button if a gesture is required. It never reevaluates source to resume playback.
+
+The browser and operating system retain control. Safari/iOS versions, battery-saving settings, competing audio, device locking and sleeping can suspend the page or audio thread. The checkbox cannot guarantee uninterrupted playback in those conditions. Play always requires an initial user action; closing the tab stops playback.
+
+References: [Audio Session](https://developer.mozilla.org/en-US/docs/Web/API/AudioSession), [page visibility policies](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API), and [WebKit background-audio issue](https://bugs.webkit.org/show_bug.cgi?id=261554).
+
 ## Metering and visuals
 
 A 1024-point master analyser supplies decimated waveform and frequency arrays at up to 20 updates per second. Independent stereo and orbit analysers provide RMS levels; the stereo waveform pair drives the phase plot. The spectrogram retains successive measured FFT columns. The UI displays RMS and peak dBFS and flags peaks near full scale. It does not claim to be a calibrated loudness meter or a mastering limiter. There is no always-on nonlinear limiter changing normal Strudel sound. Keep headroom in stacked scores.

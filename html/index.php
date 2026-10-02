@@ -37,6 +37,12 @@ $html = preg_replace_callback(
     $html,
     1,
 );
+$html = preg_replace_callback(
+    '~<meta\s+property="og:site_name"\s+content="[^"]*"\s*/?>~',
+    fn() => '<meta property="og:site_name" content="' . $title . '">',
+    $html,
+    1,
+);
 $ld = [
     "@context" => "https://schema.org",
     "@type" => "SoftwareApplication",

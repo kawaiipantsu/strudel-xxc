@@ -23,7 +23,7 @@ if ($p["visibility"] === "unlisted") {
 $url = BASE_URL . "/p/" . $p["slug"];
 $image = $p["cover_id"]
     ? BASE_URL . "/media/" . $p["cover_id"]
-    : BASE_URL . "/brand/social.png";
+    : BASE_URL . "/brand/social-studio.png";
 $files = query(
     "SELECT path,content,kind FROM project_files WHERE project_id=? ORDER BY path",
     [$p["id"]],

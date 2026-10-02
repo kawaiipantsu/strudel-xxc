@@ -5,7 +5,8 @@ function page_head(
     string $url,
     string $image = "",
 ): void {
-    $image = $image ?: BASE_URL . "/brand/social.png";
+    $image = $image ?: BASE_URL . "/brand/social-studio.png";
+    $siteName = settings()["site_title"];
     header("Content-Type: text/html; charset=utf-8");
     echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' .
         esc($title) .
@@ -13,6 +14,8 @@ function page_head(
         esc($description) .
         '"><link rel="canonical" href="' .
         esc($url) .
+        '"><meta property="og:site_name" content="' .
+        esc($siteName) .
         '"><meta property="og:type" content="music.song"><meta property="og:title" content="' .
         esc($title) .
         '"><meta property="og:description" content="' .

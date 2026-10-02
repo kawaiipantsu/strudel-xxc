@@ -128,6 +128,9 @@ export function Studio() {
     ]),
     [toast, setToast] = useState(""),
     [volume, setVolume] = useState(0.75),
+    [backgroundMusic, setBackgroundMusic] = useState<boolean>(
+      () => storeRead("xxc-background-music", true) === true,
+    ),
     [audioStatus, setAudioStatus] = useState({
       state: "suspended",
       sampleRate: 0,
@@ -417,6 +420,48 @@ export function Studio() {
     send("font", { value: font });
     send("shortcuts", { values: shortcuts });
   }, [font, ready]);
+  useEffect(() => {
+    localStorage.setItem(
+      "xxc-background-music",
+      JSON.stringify(backgroundMusic),
+    );
+    send("background-music", { enabled: backgroundMusic });
+  }, [backgroundMusic, ready]);
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) return;
+    const session = navigator.mediaSession;
+    session.playbackState =
+      playing && audioStatus.state === "running" ? "playing" : "none";
+    if (typeof MediaMetadata !== "undefined")
+      session.metadata = playing
+        ? new MediaMetadata({
+            title: project.title,
+            artist: project.author || "XXC / THUGS(red)",
+            album: "Strudel Sandbox",
+            artwork: [
+              {
+                src: "/brand/social-studio.png",
+                sizes: "1200x630",
+                type: "image/png",
+              },
+            ],
+          })
+        : null;
+    for (const action of ["pause", "stop"] as const) {
+      try {
+        session.setActionHandler(action, playing ? () => send("stop") : null);
+      } catch {}
+    }
+    return () => {
+      for (const action of ["pause", "stop"] as const) {
+        try {
+          session.setActionHandler(action, null);
+        } catch {}
+      }
+      session.playbackState = "none";
+      session.metadata = null;
+    };
+  }, [playing, audioStatus.state, project.title, project.author]);
   useEffect(() => {
     localStorage.setItem("xxc-intensity", JSON.stringify(intensity));
     localStorage.setItem("xxc-quality", quality);
@@ -885,6 +930,10 @@ export function Studio() {
       },
     ],
     ["Workspace: Preferences", () => setModal("settings")],
+    [
+      "Audio: Toggle Background Music",
+      () => setBackgroundMusic((enabled) => !enabled),
+    ],
     ["Workspace: Revision history", () => openHistory()],
   ] as [string, () => void][];
   async function openHistory() {
@@ -2342,6 +2391,23 @@ export function Studio() {
               Reduced motion
             </label>
           </div>
+          <div className="pane-heading">AUDIO / BACKGROUND PLAYBACK</div>
+          <label className="shortcut-row">
+            Allow background music
+            <input
+              type="checkbox"
+              checked={backgroundMusic}
+              onChange={(e) => setBackgroundMusic(e.target.checked)}
+              aria-describedby="background-music-help"
+            />
+          </label>
+          <p className="hint" id="background-music-help">
+            Keep Strudel playing when switching tabs or minimizing the browser.
+            When off, leaving the tab hushes playback and ends any recording;
+            press Play to restart. Safari, mobile devices and battery-saving
+            settings may still suspend audio. Playback always starts with your
+            click.
+          </p>
           <div className="pane-heading">KEYBOARD / SHORTCUTS</div>
           {Object.entries(shortcuts).map(([k, v]) => (
             <label className="shortcut-row" key={k}>

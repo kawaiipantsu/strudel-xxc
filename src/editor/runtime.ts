@@ -1,6 +1,7 @@
 import "./runtime.css";
 import { createMidiBridge } from "./midi-bridge";
 import { encodeFloatWav } from "../audio/pcm.mjs";
+import { createSchedulerClock } from "../audio/scheduler-clock";
 import * as core from "@strudel/core";
 import * as mini from "@strudel/mini";
 import * as tonal from "@strudel/tonal";
@@ -23,6 +24,23 @@ const ORIGIN = "https://strudel.xxc.dk";
 const send = (type: string, data: any = {}) =>
   parent.postMessage({ channel: "xxc-runtime", type, ...data }, ORIGIN);
 const midiBridge = createMidiBridge(send);
+const schedulerClock = createSchedulerClock(() => audio.getAudioContext());
+let allowBackgroundMusic = true;
+function configureAudioSession() {
+  const session = (
+    navigator as Navigator & {
+      audioSession?: { type: string };
+    }
+  ).audioSession;
+  if (!session) return;
+  try {
+    session.type = allowBackgroundMusic ? "playback" : "auto";
+  } catch {
+    send("log", {
+      message: "The browser could not set its background audio policy.",
+    });
+  }
+}
 let shortcutMap: Record<string, string> = {
   evaluate: "Mod+Enter",
   hush: "Mod+.",
@@ -150,6 +168,11 @@ function wireAudio() {
 let audioInitialized = false;
 let observedContext: AudioContext | undefined;
 async function enable() {
+  if (document.hidden && !allowBackgroundMusic)
+    throw new Error(
+      "Return to the studio to play, or enable Allow background music.",
+    );
+  configureAudioSession();
   const ac = audio.getAudioContext();
   if (observedContext !== ac) {
     observedContext = ac;
@@ -160,9 +183,9 @@ async function enable() {
         latency: ac.baseLatency || 0,
       });
       if ((ac.state as string) === "interrupted" || ac.state === "closed")
-        send("error", {
+        send("log", {
           message:
-            "Audio output interrupted. Check your output device, then enable audio again or reload the studio.",
+            "Browser or output device interrupted audio. Return to the studio and click Play / Enable Audio to continue.",
         });
     });
   }
@@ -196,6 +219,13 @@ async function enable() {
     await audio.initAudio();
     audioInitialized = true;
   }
+  await schedulerClock.initialize();
+  if (document.hidden && !allowBackgroundMusic) {
+    await ac.suspend();
+    throw new Error(
+      "Playback cancelled because Allow background music is off.",
+    );
+  }
   wireAudio();
   send("audio", {
     state: ac.state,
@@ -205,6 +235,7 @@ async function enable() {
 }
 
 async function evaluate(mode = "all") {
+  if (document.hidden && !allowBackgroundMusic) return;
   await enable();
   playingFileKey = fileKey;
   const view = mirror.editor;
@@ -237,6 +268,27 @@ async function stop() {
   await audio.getAudioContext().suspend();
   send("playing", { playing: false });
 }
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    if (
+      !allowBackgroundMusic &&
+      (mirror?.repl.state.started || captureState !== "inactive")
+    ) {
+      send("log", {
+        message:
+          "Hushed because Allow background music is off. Press Play when you return.",
+      });
+      stop().catch(fail);
+    }
+  } else if (
+    allowBackgroundMusic &&
+    mirror?.repl.state.started &&
+    observedContext?.state !== "running"
+  ) {
+    // Resume the existing context only; never reevaluate shared or edited source.
+    enable().catch(fail);
+  }
+});
 async function record(action: string, limit = 600, maxBytes = 33554432) {
   if (action === "start") {
     if (captureState !== "inactive") return;
@@ -320,7 +372,6 @@ function tick(now: number) {
   if (!mirror) return;
   const ac = audio.getAudioContext();
   const playing = mirror.repl.state.started && ac.state === "running";
-  if (playing) wireAudio();
   analyser?.getFloatTimeDomainData(wave);
   analyser?.getByteFrequencyData(fft);
   let rms = 0,
@@ -494,6 +545,13 @@ async function main() {
     transpiler,
     defaultOutput: audio.webaudioOutput,
     getTime: () => audio.getAudioContext().currentTime,
+    setInterval: (callback: () => void, milliseconds: number) =>
+      schedulerClock.setInterval(() => {
+        callback();
+        // Orbit routing must keep working when visual animation is suspended.
+        wireAudio();
+      }, milliseconds),
+    clearInterval: schedulerClock.clearInterval,
     beforeStart: enable,
     onEvalError: fail,
     onToggle: (playing: boolean) => send("playing", { playing }),
@@ -632,6 +690,16 @@ async function main() {
     const d = e.data;
     try {
       switch (d.type) {
+        case "background-music":
+          allowBackgroundMusic = d.enabled === true;
+          if (audioInitialized) configureAudioSession();
+          if (
+            !allowBackgroundMusic &&
+            document.hidden &&
+            (mirror.repl.state.started || captureState !== "inactive")
+          )
+            await stop();
+          break;
         case "features":
           features = { hydra: !!d.hydra, midi: !!d.midi };
           break;
