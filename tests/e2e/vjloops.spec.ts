@@ -42,20 +42,43 @@ test("VJ packs play real muted videos, keep overlays, switch clips, fullscreen a
   await expect(
     page.getByRole("region", { name: "VJ loop library" }),
   ).toContainText("146 clips · 3 packs");
+  const catalogue = await (
+    await page.request.get("/vjloops/catalog.json")
+  ).json();
   for (const pack of ["pack1", "pack2", "pack3"]) {
     await page.getByLabel("VJ pack", { exact: true }).selectOption(pack);
-    await page
-      .getByRole("button", { name: /Play VJ clip/ })
-      .first()
-      .click();
-    await page.locator(".video-preview").scrollIntoViewIfNeeded();
-    await expect
-      .poll(async () => (await current(page)).time, { timeout: 20000 })
-      .toBeGreaterThan(0.2);
-    const video = await current(page);
-    expect(video.muted).toBe(true);
-    expect(video.paused).toBe(false);
-    expect(video.ready).toBeGreaterThanOrEqual(2);
+    const targets = [catalogue.clips.find((c: any) => c.pack === pack)];
+    // These original MP4 encodings stalled around 0.1 s in WebKit despite
+    // passing codec inspection. Verify the normalized delivery, not just a poster.
+    if (pack === "pack1")
+      targets.push(
+        catalogue.clips.find(
+          (c: any) => c.title === "BEEPLE MANIFEST MONEY BURNING D",
+        ),
+      );
+    for (const clip of targets) {
+      expect(clip).toBeTruthy();
+      await page.getByLabel("Search VJ clips").fill(clip.title);
+      await page
+        .getByRole("button", {
+          name: "Play VJ clip " + clip.title,
+          exact: true,
+        })
+        .click();
+      await page.locator(".video-preview").scrollIntoViewIfNeeded();
+      await expect(page.locator(".video-preview .vj-playback")).toHaveAttribute(
+        "data-clip",
+        clip.id,
+      );
+      await expect
+        .poll(async () => (await current(page)).time, { timeout: 20000 })
+        .toBeGreaterThan(0.2);
+      const video = await current(page);
+      expect(video.muted).toBe(true);
+      expect(video.paused).toBe(false);
+      expect(video.ready).toBeGreaterThanOrEqual(2);
+    }
+    await page.getByLabel("Search VJ clips").fill("");
   }
   await page.getByLabel("Rainbow Spider", { exact: true }).check();
   await page.getByLabel("VJ framing").selectOption("contain");
@@ -73,6 +96,19 @@ test("VJ packs play real muted videos, keep overlays, switch clips, fullscreen a
     name: "Fullscreen music visualizer",
   });
   await expect(dialog).toBeVisible();
+  await dialog
+    .locator("canvas")
+    .click({ position: { x: 200, y: 300 }, force: true });
+  await expect(dialog.locator(".presentation-chrome")).toHaveCSS(
+    "opacity",
+    "0",
+    { timeout: 5000 },
+  );
+  await dialog.hover({ position: { x: 300, y: 400 } });
+  await expect(dialog.locator(".presentation-chrome")).toHaveCSS(
+    "opacity",
+    "1",
+  );
   await expect(dialog.locator(".vj-playback")).toHaveAttribute(
     "data-clip",
     selected!,
@@ -96,7 +132,7 @@ test("VJ packs play real muted videos, keep overlays, switch clips, fullscreen a
   await page
     .getByRole("checkbox", { name: /Music Video · automatic scenes/ })
     .check();
-  await page.getByLabel("Scene duration").selectOption("4");
+  await page.getByLabel("Scene duration").selectOption("2");
   await page.evaluate(() => {
     const frame = document.querySelector("iframe")!.contentWindow!;
     frame.postMessage(
@@ -129,6 +165,7 @@ test("VJ packs play real muted videos, keep overlays, switch clips, fullscreen a
   await expect(page.getByLabel("VJ pack", { exact: true })).toHaveValue(
     "pack3",
   );
+  await expect(page.getByLabel("Scene duration")).toHaveValue("2");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect.poll(async () => (await current(page)).paused).toBe(true);
   expect(errors).toEqual([]);

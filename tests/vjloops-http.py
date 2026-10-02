@@ -36,9 +36,11 @@ for path in ['/vj-media.php?file=../../config/secrets.json','/vj-media.php?file[
  check(request(path)[0] in [403,404],'private or invalid VJ path denied')
 installed=json.loads((ROOT/'storage/vjloops/installed.json').read_text())
 for c in installed:
- result=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=codec_name,pix_fmt,width','-of','json',str(ROOT/'storage/vjloops/video'/c['file'])]))['streams'][0]
- assert result['codec_name']=='h264' and result['pix_fmt'] in ['yuv420p','yuvj420p'] and result['width']<=1920
-check(True,'every installed clip is browser H.264 / 8-bit 4:2:0, at most 1920 pixels wide')
+ streams=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','stream=codec_type,codec_name,pix_fmt,width','-of','json',str(ROOT/'storage/vjloops/video'/c['file'])]))['streams']
+ assert not any(s['codec_type']=='audio' for s in streams)
+ result=next(s for s in streams if s['codec_type']=='video')
+ assert result['codec_type']=='video' and result['codec_name']=='h264' and result['pix_fmt'] in ['yuv420p','yuvj420p'] and result['width']<=1280
+check(True,'every installed clip is normalized H.264 / 8-bit 4:2:0, at most 1280 pixels wide, without audio')
 check(all(p.stat().st_uid==0 and p.stat().st_gid==33 for p in (ROOT/'storage/vjloops/video').iterdir()),'PHP can read but cannot modify VJ videos')
 check(not subprocess.check_output(['git','ls-files','assets/vjloops','storage/vjloops','html/vjloops'],cwd=ROOT),'VJ media excluded from Git')
 print(f'PASS {passed} VJ media checks')

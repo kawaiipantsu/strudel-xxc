@@ -22,6 +22,12 @@ Hush immediately gates the master output, stops the scheduler, finishes any reco
 
 The browser regression records PCM after switching from a sustained, reverberant score to a different file with an initial rest. That rest must remain silent before the new score begins. Ordinary live updates continue to use Strudel's scheduler without resetting the audio graph.
 
+## Live updates and anonymous tracks
+
+Upstream Strudel creates a new internal track ID each time `$:` is evaluated with its `shouldHush` argument set to false. The original block-evaluation integration retained those IDs, so repeated Mod+Enter added copies of the same pattern and increased the output level.
+
+The runtime now uses CodeMirror's JavaScript syntax tree to identify anonymous labels, including `S$:`. For these scores, selection/block/line updates evaluate the current whole file with Strudel's normal pattern replacement enabled. This clears the pattern registry, preserves all current tracks, and leaves the audio graph and scheduler running. Source code is unchanged. A console message explains the whole-score update. Named labels such as `drums:` can still update one block while other named tracks keep playing. Switching files also replaces the score on the first evaluation.
+
 ## Background music
 
 Open **Preferences → Audio / Background Playback → Allow background music**. The setting is on by default and persists in this browser. Turn it off to hush when the studio tab becomes hidden or the browser is minimized. That also finishes an active recording; returning to the tab does not restart it. The command palette includes **Audio: Toggle Background Music**.

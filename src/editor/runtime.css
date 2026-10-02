@@ -117,3 +117,14 @@ body[data-theme="light"] {
 #repair-sample-urls:focus-visible {
   outline: 2px solid #fff;
 }
+body[data-player="true"] #editor,
+body[data-player="true"] #runtime-error,
+body[data-player="true"] #repair-sample-urls {
+  /* StrudelMirror sets an inline display value when applying its theme. */
+  display: none !important;
+}
+body[data-player="true"] #enable-audio {
+  white-space: normal;
+  width: min(90%, 360px);
+  top: 50%;
+}

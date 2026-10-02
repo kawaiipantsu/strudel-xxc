@@ -20,8 +20,10 @@ import {
 } from "@codemirror/commands";
 import { openSearchPanel } from "@codemirror/search";
 import { setDiagnostics } from "@codemirror/lint";
-import { syntaxTree } from "@codemirror/language";
+import { syntaxTree, ensureSyntaxTree } from "@codemirror/language";
 const ORIGIN = "https://strudel.xxc.dk";
+if (new URLSearchParams(location.search).get("player") === "1")
+  document.body.dataset.player = "true";
 const send = (type: string, data: any = {}) =>
   parent.postMessage({ channel: "xxc-runtime", type, ...data }, ORIGIN);
 const midiBridge = createMidiBridge(send);
@@ -209,6 +211,7 @@ async function enable() {
           .then(() => button?.remove())
           .catch(fail);
       };
+      send("audio-unlock", { required: true });
       send("log", {
         message:
           "This browser needs a click inside the editor. Choose ENABLE AUDIO.",
@@ -218,6 +221,7 @@ async function enable() {
   await resumed;
   clearTimeout(timer);
   document.getElementById("enable-audio")?.remove();
+  send("audio-unlock", { required: false });
   if (!audioInitialized) {
     await audio.initAudio();
     audioInitialized = true;
@@ -241,15 +245,41 @@ async function evaluate(mode = "all") {
   if (document.hidden && !allowBackgroundMusic) return;
   if (stopPending) await stopPending;
   await enable();
+  let wholeFile = mode === "all" || playingFileKey !== fileKey;
   playingFileKey = fileKey;
   const view = mirror.editor;
   let code = view.state.doc.toString();
-  if (mode !== "all") {
+  if (!wholeFile) {
+    // Upstream appends a fresh id for every anonymous $: pattern when shouldHush
+    // is false. Replaying those blocks stacks voices. Keep official semantics:
+    // replace the full anonymous score; named labels can still update in place.
+    const tree = ensureSyntaxTree(view.state, code.length, 50);
+    let anonymous = !tree; // A partial parse must not accidentally stack voices.
+    tree?.iterate({
+      enter(node) {
+        if (
+          node.name === "Label" &&
+          code.slice(node.from, node.to).includes("$")
+        )
+          anonymous = true;
+      },
+    });
+    if (anonymous) {
+      wholeFile = true;
+      send("log", {
+        message:
+          "Anonymous $: tracks updated as a whole score to replace previous voices. Named tracks support block updates.",
+      });
+    }
+  }
+  if (!wholeFile) {
     const selection = view.state.selection.main;
     let from = selection.from,
       to = selection.to;
     if (from === to) {
-      let node = syntaxTree(view.state).resolveInner(from, 1);
+      // At a statement/document end, prefer the expression to the left of the
+      // caret; the right-biased lookup otherwise selects the whole Script.
+      let node = syntaxTree(view.state).resolveInner(from, from === 0 ? 1 : -1);
       while (node.parent && node.parent.name !== "Script") node = node.parent;
       if (mode === "line") {
         const line = view.state.doc.lineAt(from);
@@ -293,7 +323,7 @@ async function evaluate(mode = "all") {
     return;
   }
   document.getElementById("repair-sample-urls")?.remove();
-  await mirror.repl.evaluate(code, true, mode === "all");
+  await mirror.repl.evaluate(code, true, wholeFile);
   hushed = false;
   wireAudio();
 }
@@ -905,6 +935,11 @@ async function main() {
           break;
         case "samples":
           await audio.samples(d.map);
+          break;
+        case "sound-names":
+          send("sound-names", {
+            names: Object.keys(audio.soundMap.get()).slice(0, 20000),
+          });
           break;
         case "capabilities":
           send("capabilities", {

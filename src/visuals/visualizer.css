@@ -274,13 +274,17 @@
 }
 .video-presentation.clean .presentation-chrome {
   opacity: 0;
+  pointer-events: none;
+}
+.video-presentation.clean {
+  cursor: none;
 }
 .video-presentation.clean .presentation-status {
   opacity: 0;
 }
-.video-presentation.clean .presentation-chrome:hover,
-.video-presentation.clean .presentation-chrome:focus-within {
+.video-presentation.clean .presentation-chrome:has(:focus-visible) {
   opacity: 1;
+  pointer-events: auto;
 }
 @media (max-width: 700px) {
   .presentation-chrome {

@@ -16,6 +16,7 @@ public/sample-banks/
 html/index.html
 html/sandbox/index.html
 html/admin/index.html
+html/share-player/index.html
 html/*.png
 html/*.ico
 html/source.tar.gz

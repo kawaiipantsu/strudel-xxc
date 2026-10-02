@@ -9,7 +9,7 @@ Open **VISUALIZER**, immediately beside **VISUALS** in the right workbench. Visu
 3. Select **Watch Music Video** for a fullscreen presentation with automatic scene changes.
 4. Use **Next scene** to move on, **Hush** to stop audio, or **Close** / Escape to return to the editor.
 
-The browser Fullscreen API is used when available. If it is unavailable or refused, the presentation still fills the browser window. The presentation is an accessible modal with reachable controls. Hiding the controls leaves them available on hover or keyboard focus. **Save visual frame** downloads a PNG of the current composition, including the optional project title. This feature is a live generative presentation; it does not encode a video file.
+The browser Fullscreen API is used when available. If it is unavailable or refused, the presentation still fills the browser window. The presentation is an accessible modal with reachable controls. Controls fade after 2.5 seconds of pointer inactivity or when the pointer leaves. Movement, a tap or keyboard focus reveals them; keyboard-focused controls stay visible. **Save visual frame** downloads a PNG of the current composition, including the optional project title. This feature is a live generative presentation; it does not encode a video file.
 
 ## VJ loop videos
 
@@ -37,7 +37,7 @@ Five palettes are available: THUGS(red), Aurora, Electric, Solar and Silver. Aud
 
 ## Automatic Music Video mode
 
-The director changes scenes every 4, 8, 16 or 32 **Strudel cycles**. This uses the engine's real phase, so tempo changes remain aligned. It favors quieter scenes for low energy and stronger geometry for bass-heavy passages. It avoids immediately repeating a scene and crossfades for 1.8 seconds. **New scene sequence** changes the deterministic selection seed. Scene timing pauses through silence, paused visuals and reduced motion.
+The director changes scenes every **1, 2, 4, 8, 16 or 32 Strudel cycles**. One or two cycles suit slower scores. This uses the engine's real phase, so tempo changes remain aligned. Generated scenes favor quieter compositions for low energy and stronger geometry for bass-heavy passages. They avoid immediate repeats and crossfade for 1.8 seconds; **New scene sequence** changes their selection seed. VJ clips use fresh random choices for both their starting clip and subsequent changes, without a persisted sequence. Scene timing pauses through silence, paused visuals and reduced motion.
 
 The frequency bands use the reported sample rate/bin spacing. RMS and FFT measurements are smoothed; bass transients use a threshold and a minimum interval. The displayed bass/mid/high meters describe normalized analyser values, not calibrated loudness measurements. No microphone permission or second audio engine is needed.
 

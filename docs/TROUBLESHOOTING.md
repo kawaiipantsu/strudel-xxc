@@ -10,6 +10,10 @@
 
 The runtime’s CSP permits the data/blob worklet formats used by upstream Strudel. If an older cached page reports CSP worklet errors, reload the page. The application shell is network-first, and the service worker checks for updates without serving private API data from cache.
 
+## Volume grows after Mod+Enter
+
+Reload the studio to load the updated runtime. Earlier builds added another anonymous `$:` pattern on each block evaluation. The runtime now replaces the whole score when anonymous tracks are present, so voices do not accumulate. Named labels such as `drums:` remain available for independent block updates. This uses Strudel's pattern registry; it does not lower the master volume to hide duplicated voices.
+
 ## WebKit output channels
 
 Some WebKit environments report a maximum output channel count of zero. The documented Vite transform preserves the valid stereo destination instead of constructing a zero-input merger or setting an invalid channel count. This behavior is covered by the WebKit engine smoke test.

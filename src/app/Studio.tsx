@@ -69,7 +69,7 @@ const storeRead = (key: string, fallback: any) => {
 };
 export function Studio() {
   const [videoConfig, setVideoConfig] = useState(() =>
-    sanitizeVideo(storeRead("xxc-video", {})),
+    sanitizeVideo({ ...storeRead("xxc-video", {}), vjClip: "" }),
   );
   const [videoFullscreen, setVideoFullscreen] = useState(false);
   const videoDirector = useRef(new VideoDirector());
@@ -147,6 +147,7 @@ export function Studio() {
       storeRead("xxc-console-height", 146),
     );
   const [tool, setTool] = useState("VISUALS"),
+    [soundNames, setSoundNames] = useState<string[]>([]),
     [mode, setMode] = useState("scope"),
     [consoleTab, setConsoleTab] = useState("OUTPUT"),
     [filter, setFilter] = useState(""),
@@ -622,6 +623,15 @@ export function Studio() {
         return;
       const d = e.data;
       switch (d.type) {
+        case "sound-names":
+          if (Array.isArray(d.names) && d.names.length <= 20000)
+            setSoundNames(
+              d.names.filter(
+                (name: unknown) =>
+                  typeof name === "string" && name.length <= 160,
+              ),
+            );
+          break;
         case "ready":
           setReady(true);
           const path = proj.current.files.some(
@@ -1795,6 +1805,7 @@ export function Studio() {
               )
             }
             tab={tool}
+            soundNames={soundNames}
             setTab={setTool}
             signal={signal}
             tick={tick}

@@ -40,9 +40,10 @@ Publish a score, read someone else’s code, and make a remix.
 | **Signal workbench** | Scope, FFT spectrum/spectrogram, stereo phase plot, pattern events, piano roll, spiral and geometry. Background animation follows actual audio and events. |
 | **Visualizer** | Nine generated scenes, 146 VJ loop clips in three packs, four overlay layers and a fullscreen Music Video mode with automatic scene changes. Optional studio background and PNG snapshots. |
 | **Sample Lab** | Microphone recording, upload, waveform selection, crop, cut, duplicate, reverse, fades, normalize, gain, looping, resampling and WAV export. |
+| **Banks** | Search installed and custom banks, browse voices and aliases, and insert bank names, modifiers or playable examples into the editor. |
 | **Recording** | Uncompressed float PCM source; server exports WAV, 320 kbps MP3 and 256 kbps AAC/M4A with metadata and compatible PNG artwork. |
 | **Projects** | Local crash recovery, server autosave, revision checkpoints, private/unlisted/public visibility, ZIP bundles and remix provenance. |
-| **Library** | Search, tags, original examples, source inspection, audio previews, server-rendered share pages and a public sitemap. |
+| **Library** | Search, tags, original examples, collapsed source inspection, audio previews and server-rendered share pages with a 720p VJ player, fullscreen and animated hexagon background. Public sitemap included. |
 | **Admin** | Settings, themes, library moderation, metadata, media approval, sample packs, author overview, diagnostics and redacted activity logs. |
 
 The visual language brings together [THUGS(red)](https://thugs.red), [XXC / WAF](https://waf.xxc.dk), and [ASCIITRON](https://asciitron.xxc.dk): JetBrains Mono, ASCII framing, bracketed status text, thin rules, and restrained red. Light mode uses warm engineering-paper surfaces. The README banner was supplied by the project owner.
@@ -71,7 +72,7 @@ Choose generated scenes or your local VJ loop packs in the Visualizer. [Visualiz
 
 1. Open [strudel.xxc.dk](https://strudel.xxc.dk). The editor is the homepage.
 2. Press **Play**. Safari may ask for one more **Enable Audio** click inside the editor.
-3. Change a pattern. **Ctrl/Cmd + Enter** evaluates the selected expression or logical block.
+3. Change a pattern. **Ctrl/Cmd + Enter** evaluates a selection or logical block. Scores with anonymous `$:` tracks update as a whole file so repeated updates replace their voices. Named tracks such as `drums:` support independent block updates.
 4. Use **Update** for the whole file and **Ctrl/Cmd + .** to hush.
 5. **Ctrl/Cmd + S** saves. **Ctrl/Cmd + P** opens files; **Ctrl/Cmd + Shift + P** opens commands.
 6. Record a take, make a code cover, and publish through **Export / Share**.

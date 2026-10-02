@@ -17,6 +17,7 @@ test("music video scenes, layers, live response, fullscreen and settings persist
   const canvas = page.locator(".video-preview canvas");
   await expect(canvas).toBeVisible();
   await expect(canvas).toHaveAttribute("data-energy", "0.0000");
+  await page.getByLabel("Scene duration").selectOption("2");
   await page.getByRole("button", { name: "PLAY", exact: true }).click();
   await page.waitForTimeout(600);
   const unlock = page
@@ -101,6 +102,7 @@ test("music video scenes, layers, live response, fullscreen and settings persist
       { timeout: 15000 },
     )
     .toBeGreaterThan(shot);
+  await dialog.hover({ position: { x: 500, y: 250 } });
   const download = page.waitForEvent("download");
   await dialog.getByRole("button", { name: "Save visual frame" }).click();
   expect((await download).suggestedFilename()).toMatch(/\.png$/);

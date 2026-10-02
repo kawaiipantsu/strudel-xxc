@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Import operator-supplied VJ packs outside the web root. No media enters Git.
 
-Compatible MP4 files are hard-linked; MOV files are compressed to browser H.264, preserving source files.
+All clips are normalized to bounded 720p H.264 without audio, preserving source files.
 --check validates installed files and regenerates only the public catalogue.
 """
 import argparse, hashlib, json, os, grp, subprocess, tempfile, shutil
@@ -70,25 +70,25 @@ def main():
                 original_sha = digest(source)
                 clip_id = hashlib.sha256((original_sha+RECIPE).encode()).hexdigest()
                 previous = known.get(clip_id)
-                if previous and (STORE/'video'/previous['file']).is_file() and (STORE/'thumb'/previous['thumb']).is_file() and digest(STORE/'video'/previous['file']) == previous['sha256'] and (previous['prepared']=='linked' or previous.get('encoding')=='web720-crf24-3m'):
+                if previous and (STORE/'video'/previous['file']).is_file() and (STORE/'thumb'/previous['thumb']).is_file() and digest(STORE/'video'/previous['file']) == previous['sha256'] and previous.get('encoding')=='web720-crf24-3m':
                     clips.append(previous); continue
                 data = probe(source)
                 stream = next(s for s in data['streams'] if s['codec_type']=='video')
                 duration = float(data['format']['duration'])
                 if not 0 < duration <= 600: raise ValueError('Unexpected clip duration')
-                direct = source.suffix.lower()=='.mp4' and stream['codec_name']=='h264' and stream['pix_fmt']=='yuv420p' and stream['width']<=1920
                 file = clip_id+'.mp4'
                 target = STORE/'video'/file
                 temporary = STORE/'tmp'/file
                 if temporary.exists(): temporary.unlink()
-                if direct:
-                    os.link(source, temporary)
-                else:
-                    reserve = (1 if previous and previous['prepared']=='converted' else 2) * 1024**3
-                    if shutil.disk_usage(STORE).free < reserve + source.stat().st_size:
-                        raise ValueError('Insufficient space for conversion and application reserve')
-                    options = ['-vf',"scale=w='min(1280,iw)':h=-2,setsar=1", '-c:v','libx264','-preset','veryfast','-crf','24','-maxrate','3M','-bufsize','6M','-pix_fmt','yuv420p','-threads','2']
-                    run_ffmpeg(['-i',str(source),'-map','0:v:0','-an','-sn','-dn',*options,'-movflags','+faststart',str(temporary)])
+                # Codec labels alone missed original MP4s that stalled in WebKit.
+                # Normalize every source and budget for the bounded output, not
+                # another copy of the (already stored) high-bitrate original.
+                reserve = 2 * 1024**3
+                expected_output = int(duration * 375000) + 2 * 1024**2
+                if shutil.disk_usage(STORE).free < reserve + expected_output:
+                    raise ValueError('Insufficient space for conversion and application reserve')
+                options = ['-vf',"scale=w='min(1280,iw)':h=-2,setsar=1", '-c:v','libx264','-preset','veryfast','-crf','24','-maxrate','3M','-bufsize','6M','-pix_fmt','yuv420p','-threads','2']
+                run_ffmpeg(['-i',str(source),'-map','0:v:0','-an','-sn','-dn',*options,'-movflags','+faststart',str(temporary)])
                 protect(temporary); os.replace(temporary,target)
                 output = probe(target)
                 video = next(s for s in output['streams'] if s['codec_type']=='video')
@@ -100,7 +100,7 @@ def main():
                 clip = dict(id=clip_id, file=file, thumb=thumb, title=source.stem.replace('_',' ').replace('-', ' '),
                     pack=pack, duration=round(duration,3), width=video['width'], height=video['height'],
                     size=target.stat().st_size, sha256=digest(target), source_sha256=original_sha,
-                    source=str(source.relative_to(SOURCE)), prepared='linked' if direct else 'converted', encoding='original' if direct else 'web720-crf24-3m')
+                    source=str(source.relative_to(SOURCE)), prepared='converted', encoding='web720-crf24-3m')
                 clips.append(clip)
                 write_json(STORE/'metadata'/(clip['file']+'.json'),dict(size=clip['size'],mime='video/mp4',etag=clip['sha256']))
                 write_json(STORE/'metadata'/(clip['thumb']+'.json'),dict(size=(STORE/'thumb'/clip['thumb']).stat().st_size,mime='image/jpeg',etag=digest(STORE/'thumb'/clip['thumb'])))

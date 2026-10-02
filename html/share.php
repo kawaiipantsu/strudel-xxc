@@ -76,22 +76,28 @@ if ($p["preview_id"]) {
         esc($p["preview_id"]) .
         '">Audio preview</audio>';
 }
-echo '<div class="actions"><a class="button primary" href="/?project=' .
+echo '<div class="actions"><span id="share-play-action"></span><a class="button" href="/?project=' .
     esc($p["id"]) .
     '">OPEN IN SANDBOX ↗</a><a class="button" href="/?project=' .
     esc($p["id"]) .
     '&amp;fork=1">FORK / REMIX</a><a class="button" href="/api/projects/' .
     esc($p["id"]) .
-    '/bundle">DOWNLOAD ZIP ↓</a></div><p class="hint">Opening a score never starts playback. Review the source and press Play in the studio.</p></section></div><section class="source-section"><h2>╭─ SOURCE / ' .
+    '/bundle">DOWNLOAD ZIP ↓</a></div><p class="hint">Press Play to listen with VJ loops, or open the studio to edit. Playback runs the selected entry file. Nothing runs until you press Play.</p></section></div><div id="share-player-root" data-project-id="' .
+    esc($p["id"]) .
+    '" data-title="' .
+    esc($p["title"]) .
+    '" data-entry="' .
+    esc($p["entry_file"]) .
+    '" data-player-url="' .
+    esc($url . "/play") .
+    '"></div><section class="source-section"><h2>╭─ SOURCE / ' .
     count($files) .
     " FILES</h2>";
 foreach ($files as $f) {
     if ($f["kind"] === "folder") {
         continue;
     }
-    echo "<details" .
-        ($f["path"] === $p["entry_file"] ? " open" : "") .
-        "><summary>" .
+    echo "<details><summary>" .
         esc($f["path"]) .
         '</summary><button class="copy-code" data-copy-target="code-' .
         md5($f["path"]) .
@@ -146,4 +152,12 @@ echo '<script type="application/ld+json">' .
             JSON_UNESCAPED_SLASHES,
     ) .
     "</script>";
+// Only immutable local build tags are included; no project source is executable HTML.
+$playerShell = file_get_contents(__DIR__ . "/share-player/index.html");
+preg_match_all(
+    '~<(?:script\b[^>]*\bsrc="/assets/[^">]+"[^>]*></script|link\b[^>]*\bhref="/assets/[^">]+"[^>]*>)~',
+    $playerShell,
+    $playerAssets,
+);
+echo implode("\n", $playerAssets[0]);
 page_footer();

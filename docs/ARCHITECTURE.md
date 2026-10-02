@@ -20,6 +20,14 @@ This isolation separates privileges. It cannot make arbitrary JavaScript incapab
 
 Official SuperDough handles synthesis, samples, envelopes, effects, buses and scheduling. Studio gain/pan nodes are added after each orbit; analyzers and capture attach to the actual master output. They do not replace the engine. AudioWorklet capture sends blocks of stereo float PCM. Canvas rendering consumes reduced analyser samples and actual queried pattern events.
 
+## Project share player
+
+PHP renders project metadata and collapsed source files at `/p/{slug}`. A separate Vite entry (`src/share/main.tsx`) supplies the page background and Play control. The immutable asset tags are read from the generated `html/share-player/index.html`; project code is escaped text, never a script tag. The audio runtime mounts only after Play, in `/sandbox/?player=1`, with the editor hidden and Safari's direct audio-unlock button available inside the player. Project reads check visibility again at playback time.
+
+The responsive 1280×720 surface reuses `VideoCanvas`, the VJ director and private-media delivery. Fullscreen targets the player element itself; a window-filling fallback supports browsers without the API. The runtime and video surface stay mounted during fullscreen transitions. Stop removes the runtime to terminate audio and pending evaluation; another Play creates a fresh context. There is no save, fork or project mutation in this player.
+
+`/p/{slug}/play?cycle=1` opens directly at the player, using the same PHP visibility and metadata checks. A validated cycle parameter initializes scene timing. Neither this route nor the `#play` alternative auto-executes code or loads video before the listener presses Play. VJ choices use browser cryptographic randomness and are shared through the director so simultaneous surfaces select the same clip.
+
 ## Data model
 
 - `projects`: UUID, opaque owner hash, unique slug, visibility, metadata, tags, entry file, version, provenance and cover/preview references.

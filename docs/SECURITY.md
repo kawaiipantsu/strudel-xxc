@@ -8,7 +8,7 @@ The editor/runtime is an opaque-origin iframe with only `allow-scripts`. CSP als
 
 The host checks `event.source`, opaque origin, channel and message type. Runtime code changes are plain text rendered by React/CodeMirror, never inserted as HTML. There is no message that grants an administrator session or returns an arbitrary API response. Recording blobs are bounded before preview; persistence still requires explicit user actions and server-side validation. MIDI output is available only after an explicit trusted UI permission grant, only for connected outputs, and excludes system-exclusive data.
 
-Public share/library pages never evaluate code. Opening a project loads source into the editor without running it. Local drafts also load without execution after a crash or refresh.
+Public share/library pages never automatically evaluate code. On a project share page, **Play** explicitly fetches the current public/unlisted entry file and mounts the same opaque-origin runtime in player mode. The host sends only source, filename, feature flags and playback settings. Stop destroys the frame, including pending audio unlocks and user timers. The share page does not save or change the project. Opening a project in the studio loads source into the editor without running it. Local drafts also load without execution after a crash or refresh.
 
 The frame can access external HTTPS resources allowed by its CSP. Evaluated JavaScript can use CPU, make network requests and potentially hang its renderer. This boundary is for privilege separation, not a guarantee against denial of service in the visitor’s own browser. Read an unfamiliar score before playing it. Browser resource limits and iframe reload remain the recovery path.
 

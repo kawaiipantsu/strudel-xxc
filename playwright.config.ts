@@ -1,6 +1,12 @@
 import { defineConfig } from "@playwright/test";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 export default defineConfig({
   testDir: "tests/e2e",
+  // Traces include audio/video responses. Keep them off the live media volume.
+  outputDir:
+    process.env.XXC_TEST_OUTPUT_DIR ||
+    join(tmpdir(), "xxc-strudel-browser-results"),
   timeout: 60000,
   fullyParallel: false,
   workers: 1,

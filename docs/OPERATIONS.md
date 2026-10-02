@@ -17,6 +17,8 @@ To add or change local VJ packs, run `python3 scripts/install-vjloops.py` before
 
 Run `./scripts/test.sh` for a complete verification. The build does not erase PHP entry points or runtime media. The service worker is versioned from active asset names and uses network-first requests. No release artifacts or GitHub Releases are needed for this web deployment.
 
+Playwright traces include media response bodies. Browser artifacts go to `/tmp/xxc-strudel-browser-results` on this host, so test recordings do not consume the application's media reserve. Override this with `XXC_TEST_OUTPUT_DIR` if needed. Failed traces remain there until the next test run; the JSON report and selected screenshots remain in ignored `test-results/`.
+
 The source archive is generated from the current committed revision, so commit and push reviewed changes before packaging it. `scripts/install-maintenance.sh` installs the cron/logrotate entries and backs up any existing files before changing them. Initial setup runs it automatically.
 
 ## Services and scheduled work

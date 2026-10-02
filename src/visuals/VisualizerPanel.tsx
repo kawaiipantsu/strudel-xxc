@@ -11,11 +11,18 @@ import {
 } from "lucide-react";
 import type { Signal } from "../app/types";
 import { VideoCanvas, type VideoStats } from "./VideoCanvas";
-import { scenes, overlays, palettes, VideoDirector } from "./video-model.mjs";
+import {
+  scenes,
+  overlays,
+  palettes,
+  VideoDirector,
+  sceneCycleOptions,
+} from "./video-model.mjs";
 import type { VideoConfig } from "./video-renderer";
 import "./visualizer.css";
 import { VJBrowser } from "./VJBrowser";
 import { visualSnapshot } from "./VJPlayback";
+import { useIdleControls } from "./useIdleControls";
 
 export type VisualizerProps = {
   signal: MutableRefObject<Signal>;
@@ -156,17 +163,18 @@ export function VisualizerPanel(
             value={config.cycles}
             onChange={(e) => change({ cycles: Number(e.target.value) })}
           >
-            {[4, 8, 16, 32].map((n) => (
+            {sceneCycleOptions.map((n) => (
               <option key={n} value={n}>
-                {n} Strudel cycles
+                {n} Strudel {n === 1 ? "cycle" : "cycles"}
               </option>
             ))}
           </select>
         </label>
       )}
       <p className="video-hint">
-        Automatic scenes follow musical phrases, bass and energy, with soft
-        transitions.
+        {config.source === "vj"
+          ? "Random clips, with no immediate repeats. New sessions start with a fresh selection."
+          : "Automatic scenes follow musical phrases, bass and energy, with soft transitions."}
       </p>
       {config.source === "vj" ? (
         <VJBrowser config={config} setConfig={setConfig} />
@@ -329,9 +337,9 @@ export function VisualizerPresentation(
 ) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [stats, setStats] = useState(initialStats);
-  const [clean, setClean] = useState(false);
   const [message, setMessage] = useState("");
   const { onClose, onHush, playing, config, setConfig, director } = props;
+  const controls = useIdleControls(playing);
   useEffect(() => {
     const node = dialog.current!;
     node.showModal();
@@ -371,7 +379,8 @@ export function VisualizerPresentation(
   return (
     <dialog
       ref={dialog}
-      className={"video-presentation " + (clean ? "clean" : "")}
+      className={"video-presentation " + (controls.hidden ? "clean" : "")}
+      {...controls.handlers}
       aria-label="Fullscreen music visualizer"
       onCancel={(e) => {
         e.preventDefault();
@@ -430,9 +439,7 @@ export function VisualizerPresentation(
           <button aria-label="Save visual frame" onClick={snapshot}>
             <Download size={16} />
           </button>
-          <button onClick={() => setClean(!clean)}>
-            {clean ? "Show controls" : "Hide controls"}
-          </button>
+          <button onClick={controls.hide}>Hide controls</button>
           <button onClick={onHush} disabled={!playing}>
             <Square size={13} />
             Hush

@@ -43,14 +43,3 @@ export function useVJCatalogue() {
   }, []);
   return { data, error };
 }
-export function nextVJClip(
-  clips: VJClip[],
-  current: string,
-  shot: number,
-  seed: number,
-) {
-  const pool = clips.filter((c) => c.id !== current);
-  if (!pool.length) return clips[0];
-  const n = (Math.imul(shot + seed, 1664525) + 1013904223) >>> 0;
-  return pool[n % pool.length];
-}

@@ -1,7 +1,8 @@
 import { useEffect, useRef, type MutableRefObject } from "react";
 import type { VideoDirector } from "./video-model.mjs";
 import type { VideoConfig } from "./video-renderer";
-import { nextVJClip, useVJCatalogue, type VJClip } from "./vj-model";
+import { useVJCatalogue, type VJClip } from "./vj-model";
+import { sharedVJClip } from "./vj-random.mjs";
 export type ClipInfo = { id?: string; title?: string; error?: string };
 
 /** Two muted video layers: load the incoming clip, then crossfade and release the old decoder. */
@@ -46,6 +47,8 @@ export function VJPlayback({
       director.current.active;
     const play = (video: HTMLVideoElement) => {
       if (!video.paused || video.readyState < 2 || !mayPlay()) return;
+      video.muted = true;
+      video.volume = 0;
       video.play().catch(() => {
         if (!destroyed && mayPlay())
           info.current = {
@@ -65,6 +68,10 @@ export function VJPlayback({
         video = videos[index],
         other = videos[1 - index];
       video.pause();
+      // WebKit can reset muted when a media source is released with load().
+      video.defaultMuted = true;
+      video.muted = true;
+      video.volume = 0;
       video.style.opacity = "0";
       video.dataset.clip = clip.id;
       video.poster = clip.poster;
@@ -101,11 +108,13 @@ export function VJPlayback({
         );
         const resume = key === director.current.vjSelection;
         choose(
-          (resume
-            ? clips.find((clip) => clip.id === director.current.vjCurrent)
-            : undefined) ||
-            clips.find((clip) => clip.id === c.vjClip) ||
-            clips[0],
+          sharedVJClip(
+            director.current,
+            clips,
+            key,
+            director.current.vjShot,
+            c.vjClip,
+          ),
           resume,
         );
         director.current.vjSelection = key;
@@ -116,9 +125,12 @@ export function VJPlayback({
       }
       if (shot !== director.current.vjShot) {
         shot = director.current.vjShot;
-        choose(nextVJClip(clips, desired, shot, c.seed));
+        choose(sharedVJClip(director.current, clips, key, shot));
       }
       videos.forEach((video, index) => {
+        video.defaultMuted = true;
+        video.muted = true;
+        video.volume = 0;
         video.style.objectFit = c.vjFit;
         video.style.transitionDuration =
           current.current.reduced || motion.matches ? "0s" : ".75s";

@@ -6,10 +6,12 @@ export function HeaderParticles({
   reduced,
   quality,
   intensity,
+  variant = "header",
 }: {
   reduced: boolean;
   quality: string;
   intensity: number;
+  variant?: "header" | "page";
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -31,13 +33,16 @@ export function HeaderParticles({
       age: number;
     };
     const particles: Particle[] = [];
-    const size = 13;
+    const page = variant === "page";
+    const size = page ? 30 : 13;
     const reset = (p: Particle) => {
-      p.x = width * (0.18 + Math.random() * 0.64);
-      p.y = height / 2;
+      p.x =
+        width *
+        (page ? 0.03 + Math.random() * 0.94 : 0.18 + Math.random() * 0.64);
+      p.y = height * (page ? 0.02 + Math.random() * 0.96 : 0.5);
       p.direction = Math.floor(Math.random() * 6);
       p.progress = 0;
-      p.speed = 0.018 + Math.random() * 0.022;
+      p.speed = (page ? 0.035 : 0.018) + Math.random() * 0.022;
       p.age = 0;
     };
     const resize = () => {
@@ -47,6 +52,7 @@ export function HeaderParticles({
       const ratio = Math.min(
         window.devicePixelRatio || 1,
         quality === "low" ? 1 : 1.5,
+        page ? Math.sqrt(1000000 / Math.max(1, width * height)) : Infinity,
       );
       element.width = Math.max(1, Math.round(width * ratio));
       element.height = Math.max(1, Math.round(height * ratio));
@@ -56,8 +62,8 @@ export function HeaderParticles({
         "#ff354b";
       particles.length = 0;
       const count = Math.min(
-        quality === "low" ? 18 : 34,
-        Math.max(8, Math.floor(width / 32)),
+        page ? 70 : quality === "low" ? 18 : 34,
+        Math.max(8, Math.floor(width / (page ? 18 : 32))),
       );
       for (let i = 0; i < count; i++) {
         const p = {} as Particle;
@@ -100,7 +106,7 @@ export function HeaderParticles({
             p.x > width ||
             p.y < -size ||
             p.y > height + size ||
-            p.age > 700
+            p.age > (page ? 1500 : 700)
           )
             reset(p);
         }
@@ -140,7 +146,7 @@ export function HeaderParticles({
       document.removeEventListener("visibilitychange", refresh);
       motion.removeEventListener("change", refresh);
     };
-  }, [reduced, quality, intensity]);
+  }, [reduced, quality, intensity, variant]);
   return (
     <canvas
       ref={canvas}

@@ -6,6 +6,7 @@ import {
 } from "react";
 import { SignalCanvas } from "../visuals/SignalCanvas";
 import { SampleBanks } from "../samples/SampleBanks";
+import { BanksPanel } from "../samples/BanksPanel";
 import { sampleMapCode, sampleSnippet } from "../samples/sample-code.mjs";
 import type { Signal, Media } from "./types";
 import { api } from "./api";
@@ -45,7 +46,9 @@ export function Toolbox({
   setControls,
   features,
   visualizer,
+  soundNames,
 }: {
+  soundNames: string[];
   visualizer: ReactNode;
   features: { midi: boolean; hydra: boolean };
   tab: string;
@@ -186,6 +189,7 @@ export function Toolbox({
           "INSPECTOR",
           "DOCS",
           "SAMPLES",
+          "BANKS",
         ].map((t) => (
           <button
             key={t}
@@ -687,6 +691,13 @@ export function Toolbox({
               Official Strudel documentation ↗
             </a>
           </>
+        )}
+        {tab === "BANKS" && (
+          <BanksPanel
+            names={soundNames}
+            refresh={() => send("sound-names")}
+            insert={insert}
+          />
         )}
         {tab === "SAMPLES" && (
           <>

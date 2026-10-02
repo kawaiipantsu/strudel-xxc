@@ -90,3 +90,19 @@ test("VJ sequence advances on musical phrases without replacing manual clip sele
   d.next({ ...config, automatic: false });
   assert.equal(d.vjShot, shot + 1);
 });
+
+test("one- and two-cycle scenes follow a slow musical clock in both visual modes", () => {
+  for (const source of ["generated", "vj"])
+    for (const cycles of [1, 2]) {
+      const config = sanitizeVideo({ source, cycles });
+      assert.equal(config.cycles, cycles);
+      const d = new VideoDirector();
+      // At 0.125 CPS, two cycles last 16 seconds. Wall time alone must not cut early.
+      const signal = { rms: 0.1, peak: 0.4, fft: [], phase: 0 };
+      for (let n = 0; n < cycles * 160; n++)
+        d.update({ ...signal, phase: n / 160 }, config, n * 50);
+      assert.equal(source === "vj" ? d.vjShot : d.shot, 0);
+      d.update({ ...signal, phase: cycles }, config, cycles * 8000);
+      assert.equal(source === "vj" ? d.vjShot : d.shot, 1);
+    }
+});

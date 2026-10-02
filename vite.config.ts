@@ -44,6 +44,7 @@ export default defineConfig({
         studio: resolve("frontend/index.html"),
         sandbox: resolve("frontend/sandbox/index.html"),
         admin: resolve("frontend/admin/index.html"),
+        sharePlayer: resolve("frontend/share-player/index.html"),
       },
     },
   },

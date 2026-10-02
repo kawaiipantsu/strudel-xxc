@@ -174,7 +174,7 @@ test("Sample Lab upload, trim, save and Insert emits playable single-quoted code
   await expect(editor).toContainText("'https://strudel.xxc.dk/media/");
   await editor.click();
   await page.keyboard.press("Control+End");
-  await page.keyboard.type(
+  await page.keyboard.insertText(
     '\n$: n("<0 0 -1 3>").scale("D2:minor").s("recording").attack(.01).decay(.15).sustain(.7).release(.15).gain(.55)',
   );
   await page.getByRole("button", { name: "PLAY", exact: true }).click();
@@ -185,6 +185,98 @@ test("Sample Lab upload, trim, save and Insert emits playable single-quoted code
   expect(await page.evaluate(() => (window as any).audioTest.errors)).toEqual(
     [],
   );
+  await page.getByRole("button", { name: /HUSH/ }).click();
+});
+
+test("repeated Mod+Enter replaces anonymous tracks without raising the output level", async ({
+  page,
+}) => {
+  await setup(page);
+  await load(page, 'setcps(2)\n$: s("sine*4").freq(220).gain(.08)');
+  await send(page, { type: "evaluate", mode: "all" });
+  await unlock(page);
+  const editor = page.frameLocator("iframe").locator(".cm-content");
+  await editor.click();
+  await page.keyboard.press("Control+End");
+  const peaks: number[] = [];
+  for (let i = 0; i < 7; i++) {
+    if (i) {
+      const evaluated = await page.evaluate(
+        () => (window as any).audioTest.evaluated,
+      );
+      await editor.click();
+      await page.keyboard.press("Control+End");
+      await page.keyboard.press("Control+Enter");
+      await expect
+        .poll(() => page.evaluate(() => (window as any).audioTest.evaluated))
+        .toBeGreaterThan(evaluated);
+    }
+    await page.waitForTimeout(350);
+    await page.evaluate(() => ((window as any).audioTest.capture = null));
+    await send(page, { type: "record", action: "start" });
+    await page.waitForTimeout(400);
+    await send(page, { type: "record", action: "stop" });
+    await expect
+      .poll(() => page.evaluate(() => !!(window as any).audioTest.capture))
+      .toBe(true);
+    peaks.push(
+      await page.evaluate(async () => {
+        const data = new DataView(
+          await (window as any).audioTest.capture.arrayBuffer(),
+        );
+        let peak = 0;
+        for (let p = 44; p + 4 <= data.byteLength; p += 4)
+          peak = Math.max(peak, Math.abs(data.getFloat32(p, true)));
+        return peak;
+      }),
+    );
+    await page
+      .getByRole("button", { name: "Close dialog", exact: true })
+      .click();
+  }
+  expect(peaks[0]).toBeGreaterThan(0.001);
+  for (const peak of peaks.slice(1)) {
+    expect(peak).toBeLessThan(peaks[0] * 1.12);
+    expect(peak).toBeGreaterThan(peaks[0] * 0.88);
+  }
+  expect(await page.evaluate(() => (window as any).audioTest.errors)).toEqual(
+    [],
+  );
+  await page.getByRole("button", { name: /HUSH/ }).click();
+});
+
+test("named block updates replace their own track and preserve other playing tracks", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.evaluate(() =>
+    addEventListener("message", (e) => {
+      if (e.data?.type === "frame")
+        (window as any).frequencies = [
+          ...new Set(e.data.events.map((event: any) => event.value.freq)),
+        ].sort();
+    }),
+  );
+  await load(
+    page,
+    'setcps(2)\ndrums: s("sine*4").freq(220).gain(.08)\nbass: s("sine*4").freq(440).gain(.08)',
+  );
+  await send(page, { type: "evaluate", mode: "all" });
+  await unlock(page);
+  await expect
+    .poll(() => page.evaluate(() => (window as any).frequencies))
+    .toEqual([220, 440]);
+  // A pending edit to drums must remain unevaluated when only bass is updated.
+  await load(
+    page,
+    'setcps(2)\ndrums: s("sine*4").freq(330).gain(.08)\nbass: s("sine*4").freq(660).gain(.08)',
+  );
+  await page.frameLocator("iframe").locator(".cm-content").click();
+  await page.keyboard.press("Control+End");
+  await page.keyboard.press("Control+Enter");
+  await expect
+    .poll(() => page.evaluate(() => (window as any).frequencies))
+    .toEqual([220, 660]);
   await page.getByRole("button", { name: /HUSH/ }).click();
 });
 

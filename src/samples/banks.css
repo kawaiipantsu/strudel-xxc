@@ -1,0 +1,73 @@
+.bank-search {
+  width: 100%;
+}
+.bank-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.bank-insert-status {
+  font-size: 10px;
+  overflow-wrap: anywhere;
+  color: var(--accent);
+  min-height: 16px;
+}
+.bank-card {
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.bank-card h3 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  color: var(--bright);
+}
+.bank-card small {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.6;
+  display: block;
+}
+.bank-card > code {
+  display: block;
+  font-size: 10px;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+  color: var(--fg);
+}
+.bank-actions,
+.bank-aliases {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  margin: 8px 0;
+}
+.bank-actions button,
+.bank-aliases button,
+.bank-voices button {
+  font-size: 10px;
+  padding: 5px 7px;
+}
+.bank-card summary {
+  font-size: 10px;
+  cursor: pointer;
+  padding: 5px 0;
+}
+.bank-voices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 10px 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.bank-card button:focus-visible,
+.bank-card summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

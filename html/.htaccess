@@ -7,7 +7,7 @@ RewriteRule ^api(?:/(.*))?$ api/index.php?route=$1 [QSA,L]
 RewriteRule ^media/([a-f0-9-]+)$ media.php?id=$1 [QSA,L]
 RewriteRule ^sample-banks/audio/([a-f0-9]{64}\.(?:wav|mp3|ogg|flac|aiff?))$ sample-bank.php?file=$1 [END]
 RewriteRule ^vjloops/(?:video|thumb)/([a-f0-9]{64}\.(?:mp4|jpg))$ vj-media.php?file=$1 [END]
-RewriteRule ^p/([a-z0-9-]+)$ share.php?slug=$1 [QSA,L]
+RewriteRule ^p/([a-z0-9-]+)(?:/play)?$ share.php?slug=$1 [QSA,L]
 RewriteRule ^library/?$ library.php [L]
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
 <IfModule mod_headers.c>

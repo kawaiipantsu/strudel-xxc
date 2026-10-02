@@ -55,6 +55,18 @@ An explicit external `samples()` call can replace previously registered sounds w
 
 Open **SAMPLES** in the right workbench to search names or aliases, filter by collection, audition, favorite and insert sounds. Results are paginated to keep the editor responsive. Collection filters show upstream attribution and published license status.
 
+## Banks tab
+
+Open **BANKS** in the right workbench to browse the installed bank names, short aliases, General MIDI instruments and custom banks loaded by your score. Search matches bank names, aliases, collections and individual voices.
+
+- **Insert .bank()** inserts a modifier such as `.bank("RolandTR909")` at the editor cursor, replacing any selection.
+- **Name** inserts only the bank name, useful inside an existing quoted value.
+- **Example** inserts a complete pattern using a voice from that bank.
+- Expand **Browse voices** and click a voice to insert its pattern. General MIDI and wavetable examples include a starting note.
+- After loading a custom sample map, click **Refresh banks** to include its registered sound names.
+
+Insertions use the editor's normal undo history. The browser reads names from the isolated runtime; sample URLs and credentials are not passed to this panel. **Default / unbanked** groups sounds used without a bank prefix. Banks follow Strudel's `bank_voice` naming convention.
+
 ## Reproduce the installation
 
 ```bash

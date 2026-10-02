@@ -78,6 +78,7 @@ export const defaultVideo = {
   paused: false,
   seed: 1,
 };
+export const sceneCycleOptions = [1, 2, 4, 8, 16, 32];
 export const clamp = (n, lo = 0, hi = 1) =>
   Math.min(hi, Math.max(lo, Number.isFinite(n) ? n : lo));
 export function sanitizeVideo(input = {}) {
@@ -105,7 +106,7 @@ export function sanitizeVideo(input = {}) {
     sensitivity: clamp(Number(input.sensitivity ?? 1.2), 0.25, 3),
     overlayOpacity: clamp(Number(input.overlayOpacity ?? 0.55)),
     motion: clamp(Number(input.motion ?? 0.7), 0.1, 1.5),
-    cycles: [4, 8, 16, 32].includes(input.cycles) ? input.cycles : 8,
+    cycles: sceneCycleOptions.includes(input.cycles) ? input.cycles : 8,
     background: input.background === true,
     titles: input.titles !== false,
     paused: input.paused === true,
@@ -152,6 +153,8 @@ export class VideoDirector {
     this.vjCurrent = "";
     this.vjTime = 0;
     this.vjSelection = "";
+    this.vjChoiceKey = "";
+    this.vjChoiceId = "";
     this.lastSelection = "";
     this.seed = 1;
     this.reduced = false;

@@ -9,13 +9,29 @@ Open **VISUALIZER → VJ Loops**. The studio includes the operator's three packs
 3. Add optional Spider, Spark Dust, Waveform Halo or Code Fragments overlays.
 4. Choose **Fullscreen**, or **Watch Music Video** to enable automatic clip changes.
 
-Automatic mode switches clips from the selected pack every 4, 8, 16 or 32 audible Strudel cycles. It avoids selecting the same clip twice in a row and crossfades after the incoming video is ready. **Next scene** changes clips manually. Clip selection and the playback position carry between the preview and fullscreen presentation.
+Automatic mode switches clips from the selected pack every **1, 2, 4, 8, 16 or 32** audible Strudel cycles. Shorter settings work well for slow tempos. Each starting clip and subsequent change uses fresh browser randomness, avoids immediately repeating a clip, and crossfades after the incoming video is ready. **Next scene** also picks randomly. Clicking a thumbnail still selects that exact clip. Reloading starts a fresh sequence while keeping the chosen pack and timing.
+
+The director shares each random choice across preview, background and fullscreen. Changing views preserves the selected clip and playback position instead of drawing another random clip.
 
 **Playback speed** adjusts the clip independently of the music. **Follow audio energy** varies this speed gently with the measured master energy. This is an expressive response, not optical beat detection or guaranteed synchronization of movement within a prerecorded clip. **Fill screen** crops to fill the display; **Show full clip** preserves the full frame with letterboxing.
 
 Hush, paused visuals, hidden/offscreen views and reduced motion pause video playback. Closing the VJ tab releases its media sources. Switching back resumes the selected composition. **Use as studio background** also works with video. Only selected/incoming clips load; browsing uses small, lazy-loaded JPEG thumbnails. Fullscreen removes the studio preview/background renderers. With preview and studio background both enabled, each visible surface has its own decoder.
 
 **Save visual frame** composites the actual video frame, overlays and title into a PNG. The feature does not export an encoded music-video file. Videos do not enter project ZIPs or recordings.
+
+## Play from a project link
+
+Public and unlisted `/p/{slug}` pages have a **Play** button. It plays the project's selected entry file in a **1280×720** VJ window that scales down on smaller screens. Other source files remain available for inspection and start collapsed. The page does not run any score or fetch video clips until Play is clicked.
+
+Link directly to **`/p/{slug}/play?cycle=1`** to open at the player. The `cycle` parameter accepts `1`, `2`, `4`, `8`, `16` or `32`; omitted or invalid values use eight. `/p/{slug}?cycle=2#play` also works. **Copy player link** includes the timing selected in the player. These links reveal the controls without starting audio; the listener presses Play. Canonical/social URLs remain the main project page, and private projects remain inaccessible.
+
+Use **Fullscreen** / **Exit**, **Next loop**, **Pause visuals**, **Volume** and **Stop** inside the player. **Change every** selects 1, 2, 4, 8, 16 or 32 Strudel cycles (eight by default). Fullscreen preserves playback; browsers without element fullscreen use a window-filling view that also closes with Escape. VJ clips are silent, respond to measured audio energy and change randomly on the selected timing. Reduced motion freezes the video frame while allowing music to play. Some Safari configurations require **Enable audio** inside the player after Play.
+
+During playback, video controls fade after 2.5 seconds of pointer inactivity or when the pointer leaves. Move the pointer, tap, or focus a control with the keyboard to reveal them. Keyboard-focused controls stay visible. Controls remain visible while stopped or waiting for audio activation. The studio's fullscreen visualizer uses the same behavior.
+
+The page background uses the same original hexagonal particle renderer as the studio header, inspired by [towc's particle study](https://codepen.io/towc/pen/mJzOWJ). It uses red trails, bounded resolution, a frame-rate cap and a **Pause background** control. Hidden tabs suspend decoration; system reduced-motion preferences show static trails.
+
+Play does not save or alter the project. Stop destroys its isolated runtime; Play starts the entry file again. Audio can continue in another tab while the browser allows it. See the [security model](SECURITY.md) for executable scores and the [audio guide](AUDIO_ENGINE.md) for background-playback limits.
 
 ## Local import and updates
 
@@ -28,11 +44,13 @@ python3 tests/vjloops-http.py
 npx playwright test tests/e2e/vjloops.spec.ts
 ```
 
-The importer hashes and inspects local `.mp4` and `.mov` files with FFprobe. It accepts bounded video durations and prepares 8-bit 4:2:0 H.264 MP4s (retaining full-range color where present) at no more than 1920 pixels wide. Compatible MP4s are hard-linked into private storage. MOV, MJPEG and oversized sources are transcoded with FFmpeg to at most 1280 pixels wide, using CRF 24 and a 3 Mb/s video-rate cap. Compatible MP4 originals retain their original resolution (up to 1920 pixels wide). Converted files omit audio. Original MP4 soundtracks may remain in their files but are always muted by the player.
+The importer hashes and inspects local `.mp4` and `.mov` files with FFprobe. Every clip is normalized to 8-bit 4:2:0 H.264 MP4 at no more than 1280 pixels wide, using FFmpeg, CRF 24 and a 3 Mb/s video-rate cap. Prepared clips have fast-start metadata and no audio track. Full-range color is retained where present.
 
-This installation reuses **88 original MP4s** and prepares **58 converted files**. Conversions add **196,457,380 bytes**. Original files total approximately 4.6 GB; there is no second full copy. New conversions preserve a 2 GiB application reserve plus temporary working space. Re-encoding an existing derived copy can use a 1 GiB temporary reserve to recover disk space. The host had approximately 2.3 GiB free after optimization; sample uploads and recording exports were checked again against the application’s unchanged 2 GiB reserve. Check available disk space before adding more packs.
+The first import reused 88 original MP4s, but some stalled near the first frame in WebKit despite valid codec metadata. A bare video element reproduced the problem, and normalization fixed playback. All **146 clips** now use the same browser encoding. Original files total approximately 4.6 GB and remain intact; the browser copies are much smaller.
 
-Because compatible originals and installed files share an inode, replace source files instead of editing their bytes in place. Run the importer after changing packs. Hashes and the prepared-format recipe determine media identifiers. Originals stay on disk. Existing project uploads are untouched.
+The installed browser copies total **302,776,942 bytes**. The host has approximately 2.1 GiB free after normalization, including the protected 2 GiB reserve. Adding larger packs or long recordings will require more disk space.
+
+Conversions preserve a 2 GiB application reserve plus the estimated bounded output size and temporary overhead. Check disk space before adding more packs. Run the importer after changing packs. Hashes and the prepared-format recipe determine media identifiers. The byte-hash query in each public URL changes when an encoding is replaced, so browsers request the new copy. Existing project uploads are untouched.
 
 The normal build runs `python3 scripts/install-vjloops.py --check`: it verifies every installed video hash and regenerates public metadata. It does not transcode or download media. A checkout without supplied packs builds with an empty VJ catalogue. The deployment's VJ tests expect all three supplied packs.
 

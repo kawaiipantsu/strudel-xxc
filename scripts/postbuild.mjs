@@ -10,6 +10,7 @@ for (const page of [
   "html/index.html",
   "html/sandbox/index.html",
   "html/admin/index.html",
+  "html/share-player/index.html",
 ]) {
   const data = fs.readFileSync(page, "utf8");
   for (const m of data.matchAll(/\/assets\/[^"']+/g)) active.add(m[0]);

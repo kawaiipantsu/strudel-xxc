@@ -15,7 +15,7 @@ This combined application is licensed AGPL-3.0-or-later. Strudel, SuperDough and
 - README banner: supplied by the project owner at assets/strudel_xxc_dk_readme_banner.png. It is not presented as a third-party asset or relicensed sample pack.
 - Hydra: hydra-synth is AGPL-3.0; loaded on demand.
 - The official soundfont package registers 125 General MIDI instruments; audio variants load from the upstream host on first use. No complete soundfont bank is bundled. Installed sample collections have separate attribution and published license status in [LICENSES/samples](../LICENSES/samples/README.md) and [Sample banks](SAMPLE_BANKS.md).
-- The header hexagon trails are an original Canvas implementation inspired by [towc’s particle study](https://codepen.io/towc/pen/mJzOWJ); no CodePen script or remote dependency is embedded.
+- The header and project-page hexagon trails are an original Canvas implementation inspired by [towc’s particle study](https://codepen.io/towc/pen/mJzOWJ); no CodePen script or remote dependency is embedded.
 - The music-video renderer and its overlay layers are original application code. Inspected visual studies and artist credits are listed in [Visualizer](VISUALIZER.md); no scripts or assets from those demonstrations are bundled.
 - Operator-supplied VJ media is excluded from Git. Pack 1 credits Beeple and retains its supplied notice; Packs 2 and 3 have no supplied license notice. See [VJ Loops](VJ_LOOPS.md) for the import and attribution record.
 - Browser media encoders are platform components. FFmpeg and its codecs are host tooling; no FFmpeg binary is redistributed by this repository.
