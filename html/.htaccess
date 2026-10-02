@@ -5,6 +5,8 @@ RewriteRule ^(?:config|storage|backend|docs|node_modules|\.git)(?:/|$) - [F,L]
 RewriteRule (^|/)\. - [F,L]
 RewriteRule ^api(?:/(.*))?$ api/index.php?route=$1 [QSA,L]
 RewriteRule ^media/([a-f0-9-]+)$ media.php?id=$1 [QSA,L]
+RewriteRule ^sample-banks/audio/([a-f0-9]{64}\.(?:wav|mp3|ogg|flac|aiff?))$ sample-bank.php?file=$1 [END]
+RewriteRule ^vjloops/(?:video|thumb)/([a-f0-9]{64}\.(?:mp4|jpg))$ vj-media.php?file=$1 [END]
 RewriteRule ^p/([a-z0-9-]+)$ share.php?slug=$1 [QSA,L]
 RewriteRule ^library/?$ library.php [L]
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
@@ -27,7 +29,7 @@ php_flag display_errors Off
 </IfModule>
 
 <IfModule mod_headers.c>
-<FilesMatch "^(sw\.js|index\.html|manifest\.webmanifest)$">
+<FilesMatch "^(sw\.js|index\.html|manifest\.webmanifest|runtime\.json|catalog\.json)$">
 Header set Cache-Control "no-cache"
 </FilesMatch>
 </IfModule>

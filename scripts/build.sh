@@ -3,6 +3,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 npm ci --ignore-scripts
 python3 scripts/generate-samples.py
+node scripts/soundfont-catalog.mjs
+python3 scripts/install-sample-banks.py --check
+python3 scripts/install-vjloops.py --check
 python3 scripts/graphics.py
 npm run licenses
 npm run build

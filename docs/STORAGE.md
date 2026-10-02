@@ -4,6 +4,7 @@ All uploaded and generated user media lives under `storage/`, outside Apache’s
 
 | Directory | Data | Automatic retention |
 |---|---|---|
+| `sample-banks/` | Verified system banks, content-addressed audio and metadata | None |
 | `samples/` | Validated user audio | None |
 | `recordings/` | Captured original takes | None |
 | `exports/` | WAV/MP3/M4A derivatives | None |
@@ -35,6 +36,8 @@ Import validates every path and size before reading source or staging individual
 ## Permissions
 
 Public directories/files: `www-data:www-data`, `0755`/`0644`. Storage directories/files: `www-data:www-data`, `0750`/`0640`. Private configuration: `root:www-data`, directory `0750`, secret file `0640`. Initial database setup output and administrator credential file: root-owned `0600`.
+
+Installed system banks are an exception: `storage/sample-banks` is `root:www-data`, directories `0750`, files `0640`, so PHP can serve but cannot modify them. The session-free `/sample-banks/audio/{hash}.{extension}` endpoint serves only locally verified files. See [Sample banks](SAMPLE_BANKS.md).
 
 Run `./scripts/permissions.sh` after deployment. Never set world-write permissions or expose `storage/` through an Apache alias.
 

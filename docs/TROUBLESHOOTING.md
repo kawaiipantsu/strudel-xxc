@@ -5,7 +5,7 @@
 1. Press Play. If Safari shows **Enable Audio** inside the editor, click it.
 2. Check master volume and orbit mute/solo controls.
 3. Open Audio/Problems in the bottom console. A suspended AudioContext needs a user gesture; a missing sample needs a valid name/map.
-4. Try the built-in Minimal Beat. It uses self-hosted original samples.
+4. Try the built-in Minimal Beat. It uses self-hosted samples.
 5. Test the device/browser output volume. The UI’s meters reflect the WebAudio signal, not the physical speaker level.
 
 The runtime’s CSP permits the data/blob worklet formats used by upstream Strudel. If an older cached page reports CSP worklet errors, reload the page. The application shell is network-first, and the service worker checks for updates without serving private API data from cache.
@@ -19,6 +19,24 @@ Some WebKit environments report a maximum output channel count of zero. The docu
 Uploaded samples need an existing owning project and a valid MIME/audio stream. Source filenames are converted to safe sample names. Use Sample Lab’s Insert into Strudel action, which inserts the correct map. Reopen a saved private project if a capability URL is older than 24 hours; project reads refresh those URLs.
 
 External audio needs HTTPS and CORS permission from its host. HTTP-only sample hosts may be blocked as mixed content. The application does not download arbitrary remote URLs on the server as a workaround.
+
+### Inserted sample reports a mini-notation parse error at `/`
+
+Strudel interprets double-quoted strings as mini notation. Sample URL strings must use single quotes, for example `samples({ recording: 'https://example.org/recording.wav' })`. Sample Lab, uploaded samples and pack insertion now generate single-quoted maps. Your recording does not need to be recreated.
+
+For code inserted by an earlier build, Play offers **REPAIR SAMPLE MAP QUOTES & PLAY** inside the editor. This changes only literal strings in `samples(...)` maps, visibly and with undo support. It preserves musical mini-notation strings such as `s("recording")`. Save after repairing. Private sample capability URLs still need to be valid; do not post them in issues or public discussions.
+
+### Piano reports a decoding failure
+
+The initial bank verification step replaced metadata with permissions that prevented PHP from reading it. The installer now preserves the `root:www-data` owner/group on atomic writes. All 29 piano recordings have been decoded successfully in Chromium and WebKit. Reload after deployment to clear the old runtime's failed sample cache. Operators can verify with `python3 scripts/install-sample-banks.py --check` and `python3 tests/sample-banks-http.py`; `./scripts/permissions.sh` also restores the required read permissions.
+
+### Previous score is briefly audible after Hush
+
+Hush now clears the official output/orbit graph and old effect tails before the next playback. Reload an older open studio tab to use this fix. Normal live updates retain Strudel's timing and sound routing.
+
+## Music video fullscreen
+
+Use **VISUALIZER → Watch Music Video** for automatic scenes, or **Fullscreen** for the current composition. The studio enters native fullscreen before opening the presentation dialog, keeping the video above the editor. Close or Escape returns to the studio. Browsers without native fullscreen use a window-filling presentation. On mobile, the sliders button beside Save opens the right workbench. See the [Visualizer guide](VISUALIZER.md).
 
 ## Save conflict or API outage
 
@@ -69,3 +87,11 @@ Click **New +** in the top bar. The studio saves local or edited work first, hus
 New clears the library-link query parameters, so reloading stays in the new workspace. Editor tabs, closed-tab history, metadata and undo state are isolated from the previous project. On mobile it closes tool drawers so the blank editor is visible. Stop an active recording before starting another project.
 
 If the checkpoint fails, the existing workspace stays open with an error message. Restore the connection or resolve the save error and try New again; it does not discard unsaved work to continue.
+
+## Missing default sounds (RolandTR909, piano, misc)
+
+Reload the studio after deployment and check Output for “Sample banks ready”. These banks are now included by default. An already-open runtime retains the old sound registry until reload. Administrators can run `python3 scripts/install-sample-banks.py --check` to verify installation and `python3 scripts/install-sample-banks.py` to repair missing files. Explicit external `samples()` calls can override default names; reload to restore the defaults. See [Sample banks](SAMPLE_BANKS.md).
+
+## Missing `gm_piano` or `gm_electric_bass_finger`
+
+These are General MIDI soundfont instruments, separate from the local sample banks. The runtime now calls the official `registerSoundfonts()` during startup. Reload an older studio tab to receive that registry; no manual loading line is needed. The first note fetches the selected soundfont from the upstream host. If loading fails after registration, check network access to `felixroos.github.io` and the console error. The local Salamander `piano` is a separate instrument.

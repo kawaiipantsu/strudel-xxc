@@ -1,5 +1,12 @@
-import { useState, useEffect, type MutableRefObject } from "react";
+import {
+  useState,
+  useEffect,
+  type MutableRefObject,
+  type ReactNode,
+} from "react";
 import { SignalCanvas } from "../visuals/SignalCanvas";
+import { SampleBanks } from "../samples/SampleBanks";
+import { sampleMapCode, sampleSnippet } from "../samples/sample-code.mjs";
 import type { Signal, Media } from "./types";
 import { api } from "./api";
 import { docs } from "./docs";
@@ -37,7 +44,9 @@ export function Toolbox({
   controls,
   setControls,
   features,
+  visualizer,
 }: {
+  visualizer: ReactNode;
   features: { midi: boolean; hydra: boolean };
   tab: string;
   setTab: (s: string) => void;
@@ -59,9 +68,6 @@ export function Toolbox({
   const [q, setQ] = useState(""),
     [samples, setSamples] = useState<Media[]>([]),
     [packs, setPacks] = useState<any[]>([]),
-    [favorites, setFavorites] = useState<string[]>(() =>
-      JSON.parse(localStorage.getItem("xxc-favorites") || "[]"),
-    ),
     [mix, setMix] = useState<Record<string, any>>({}),
     [midi, setMidi] = useState<any>(),
     [devices, setDevices] = useState<any[]>([]),
@@ -172,20 +178,27 @@ export function Toolbox({
   return (
     <aside className="toolbox">
       <div className="tool-tabs" role="tablist" aria-label="Workbench">
-        {["VISUALS", "MIXER", "CONTROLS", "INSPECTOR", "DOCS", "SAMPLES"].map(
-          (t) => (
-            <button
-              key={t}
-              role="tab"
-              aria-selected={tab === t}
-              onClick={() => setTab(t)}
-            >
-              {t}
-            </button>
-          ),
-        )}
+        {[
+          "VISUALS",
+          "VISUALIZER",
+          "MIXER",
+          "CONTROLS",
+          "INSPECTOR",
+          "DOCS",
+          "SAMPLES",
+        ].map((t) => (
+          <button
+            key={t}
+            role="tab"
+            aria-selected={tab === t}
+            onClick={() => setTab(t)}
+          >
+            {t}
+          </button>
+        ))}
       </div>
       <div className="tool-content">
+        {tab === "VISUALIZER" && visualizer}
         {tab === "VISUALS" && (
           <>
             <div className="pane-heading">
@@ -692,36 +705,7 @@ export function Toolbox({
               <SlidersHorizontal size={15} />
               Open Sample Lab
             </button>
-            <div className="pane-heading">ORIGINAL / CC0 STARTER PACK</div>
-            {["bd", "sd", "hh", "oh", "cp", "rim", "tone"]
-              .filter((n) => n.includes(q))
-              .map((n) => (
-                <div className="sample-row" key={n}>
-                  <button
-                    aria-label={"Favorite " + n}
-                    onClick={() => {
-                      const f = favorites.includes(n)
-                        ? favorites.filter((x) => x !== n)
-                        : [...favorites, n];
-                      setFavorites(f);
-                      localStorage.setItem("xxc-favorites", JSON.stringify(f));
-                    }}
-                  >
-                    {favorites.includes(n) ? "★" : "☆"}
-                  </button>
-                  <b>{n}</b>
-                  <button
-                    onClick={() => {
-                      const a = new Audio("/samples/" + n + ".wav");
-                      a.volume = 0.6;
-                      a.play().catch((e) => onLog(e.message));
-                    }}
-                  >
-                    ▶
-                  </button>
-                  <button onClick={() => insert(`s("${n}")`)}>Insert</button>
-                </div>
-              ))}
+            <SampleBanks query={q} insert={insert} onLog={onLog} />
             <div className="pane-heading">CURATED SAMPLE PACKS</div>
             {packs.map((p) => (
               <div className="sample-card" key={p.id}>
@@ -730,9 +714,7 @@ export function Toolbox({
                 <p>{p.description}</p>
                 <button
                   onClick={() =>
-                    insert(
-                      "\nsamples(" + JSON.stringify(p.map, null, 2) + ")\n",
-                    )
+                    insert("\nsamples(" + sampleMapCode(p.map) + ")\n")
                   }
                 >
                   Insert pack map
@@ -754,7 +736,10 @@ export function Toolbox({
                   <button
                     onClick={() =>
                       insert(
-                        `\nsamples({ ${m.metadata.sample_name || "my_sample"}: ${JSON.stringify(m.url)} })\n$: s("${m.metadata.sample_name || "my_sample"}")\n`,
+                        sampleSnippet(
+                          m.metadata.sample_name || "my_sample",
+                          m.url,
+                        ),
                       )
                     }
                   >

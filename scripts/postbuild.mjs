@@ -41,11 +41,13 @@ const precache = [
   "/pcm-worklet.js",
   "/brand/mark.svg",
   "/brand/loading.svg",
+  "/sample-banks/runtime.json",
+  "/sample-banks/catalog.json",
   ...active,
 ].filter((x) => !x.includes("/admin"));
 fs.writeFileSync(
   "html/sw.js",
-  `const CACHE='xxc-studio-${version}';const FILES=${JSON.stringify(precache)};self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('xxc-studio-')&&k!==CACHE).map(k=>caches.delete(k))))));self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin||u.pathname.startsWith('/api/')||u.pathname.startsWith('/media/')||u.pathname.startsWith('/admin')||u.pathname.startsWith('/p/')||u.pathname.startsWith('/library'))return;const safe=u.pathname==='/'||u.pathname==='/sandbox/'||u.pathname==='/pcm-worklet.js'||u.pathname.startsWith('/assets/')||u.pathname.startsWith('/brand/')||u.pathname.startsWith('/samples/');if(!safe)return;e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>caches.match(e.request).then(r=>r||new Response('Offline: asset unavailable',{status:503}))));});\n`,
+  `const CACHE='xxc-studio-${version}';const FILES=${JSON.stringify(precache)};self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('xxc-studio-')&&k!==CACHE).map(k=>caches.delete(k))))));self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin||u.pathname.startsWith('/api/')||u.pathname.startsWith('/media/')||u.pathname.startsWith('/admin')||u.pathname.startsWith('/p/')||u.pathname.startsWith('/library'))return;const safe=u.pathname==='/'||u.pathname==='/sandbox/'||u.pathname==='/pcm-worklet.js'||u.pathname.startsWith('/assets/')||u.pathname.startsWith('/brand/')||u.pathname.startsWith('/samples/')||u.pathname==='/sample-banks/runtime.json'||u.pathname==='/sample-banks/catalog.json';if(!safe)return;e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>caches.match(e.request).then(r=>r||new Response('Offline: asset unavailable',{status:503}))));});\n`,
 );
 fs.writeFileSync(
   "html/build.json",

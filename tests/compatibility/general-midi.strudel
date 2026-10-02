@@ -1,0 +1,3 @@
+setcpm(120/4)
+$: note("c4 e4 g4 b4").s("gm_piano").gain(.5)
+$: note("c2 ~ g2 ~").s("gm_electric_bass_finger").gain(.6)

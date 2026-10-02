@@ -11,9 +11,15 @@
 7. Kept Redis and FFmpeg as existing host services/tools. Installed `libmanette-0.2-0` and `libenchant-2-2` (and their small dependencies) to run the WebKit test browser; these are test prerequisites, not an application backend.
 8. Set public files to `www-data:www-data`, directories `0755`, files `0644`; private storage to `www-data:www-data`, directories `0750`, files `0640`; configuration to `root:www-data`, directory `0750`, secret file `0640`.
 
+9. Installed the complete default sample maps and full Dirt bank into private `storage/sample-banks` using `python3 scripts/install-sample-banks.py --update-lock`, then pinned all audio hashes. Normal setup uses `python3 scripts/install-sample-banks.py` to reproduce that lock. No audio is committed to Git.
+
 ## Required host tools
 
 PHP 8.4 with PDO MySQL, Redis, fileinfo, GD, ZIP, mbstring, JSON and sessions; MariaDB; Redis on localhost; FFmpeg/FFprobe and librsvg (`rsvg-convert`); Node/npm for builds; Python 3; ImageMagick for original static graphic rasterization. The deployed host already provided the production tools.
+
+Allow approximately 3 GB for system samples and at least 2 GiB additional free storage. On an existing checkout upgrading to the sample-bank build, run `python3 scripts/install-sample-banks.py` once before building.
+
+Optional operator-supplied VJ packs go under `assets/vjloops/` and stay outside Git. Initial setup imports them if present. For later additions, run `python3 scripts/install-vjloops.py` before building. The installed three packs contain 146 clips; preparation reused compatible originals and added about 196 MB of browser versions. See [VJ Loops](VJ_LOOPS.md) for separate media backups and disk requirements.
 
 The font TTF and original SVG source are committed in `public/`, so future graphics builds do not require a font download. npm downloads are pinned by `package-lock.json`.
 

@@ -65,7 +65,7 @@ test("real engine, signal, tabs, themes, recording, save and reload", async ({
   });
   expect(capturePeak).toBeGreaterThan(0.001);
   await page.getByRole("button", { name: "Close dialog", exact: true }).click();
-  await page.getByRole("button", { name: "HUSH", exact: false }).click();
+  await page.getByRole("button", { name: "HUSH", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "PLAY", exact: true }),
   ).toBeVisible();
@@ -182,7 +182,7 @@ test("library opens without execution, sample upload, cover, publish and share",
     .getByRole("button", { name: "ENABLE AUDIO", exact: false });
   if (await enable.count()) await enable.click();
   await page.waitForTimeout(500);
-  await page.getByRole("button", { name: "HUSH", exact: false }).click();
+  await page.getByRole("button", { name: "HUSH", exact: true }).click();
   await page
     .getByRole("button", { name: "Export / Share", exact: false })
     .click();

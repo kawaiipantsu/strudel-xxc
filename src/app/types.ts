@@ -39,6 +39,8 @@ export type Media = {
   approved: number;
 };
 export type Signal = {
+  sampleRate?: number;
+  fftBinHz?: number;
   wave: number[];
   fft: number[];
   rms: number;

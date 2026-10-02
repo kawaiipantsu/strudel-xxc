@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Play,
   Square,
@@ -46,6 +46,13 @@ import type { Project, ProjectFile, Signal } from "./types";
 import { emptySignal } from "./types";
 import { Modal } from "./Modal";
 import { SignalCanvas } from "../visuals/SignalCanvas";
+import { HeaderParticles } from "../visuals/HeaderParticles";
+import { VideoDirector, sanitizeVideo } from "../visuals/video-model.mjs";
+import { VideoCanvas } from "../visuals/VideoCanvas";
+import {
+  VisualizerPanel,
+  VisualizerPresentation,
+} from "../visuals/VisualizerPanel";
 import { Toolbox, type Control } from "./Toolbox";
 import { SampleLab } from "../samples/SampleLab";
 import { Library as LibraryView } from "../library/Library";
@@ -61,6 +68,29 @@ const storeRead = (key: string, fallback: any) => {
   }
 };
 export function Studio() {
+  const [videoConfig, setVideoConfig] = useState(() =>
+    sanitizeVideo(storeRead("xxc-video", {})),
+  );
+  const [videoFullscreen, setVideoFullscreen] = useState(false);
+  const videoDirector = useRef(new VideoDirector());
+  useEffect(() => {
+    localStorage.setItem("xxc-video", JSON.stringify(videoConfig));
+  }, [videoConfig]);
+  const presentVideo = () => {
+    if (
+      !document.fullscreenElement &&
+      document.documentElement.requestFullscreen
+    )
+      document.documentElement
+        .requestFullscreen()
+        .catch(() => {})
+        .finally(() => setVideoFullscreen(true));
+    else setVideoFullscreen(true);
+  };
+  const closeVideo = () => {
+    setVideoFullscreen(false);
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  };
   const initialPreferences = useRef({
     theme: localStorage.getItem("xxc-theme"),
     intensity: localStorage.getItem("xxc-intensity"),
@@ -1134,16 +1164,64 @@ export function Studio() {
         );
       });
   };
+  const videoTokens = useMemo(
+    () =>
+      [
+        ...new Set(
+          project.files
+            .filter((f) => f.kind !== "folder")
+            .map((f) => f.content)
+            .join(" ")
+            .match(/[A-Za-z_$][\w$]{1,22}/g) || [],
+        ),
+      ].slice(0, 24),
+    [project.files],
+  );
+  const videoProps = {
+    signal,
+    director: videoDirector,
+    config: videoConfig,
+    setConfig: setVideoConfig,
+    quality,
+    reduced,
+    title: project.title,
+    tokens: videoTokens,
+  };
   return (
     <div className={"studio " + (performanceMode ? "performance" : "")}>
-      <SignalCanvas
-        signal={signal}
-        background
-        intensity={intensity}
-        quality={quality}
-        reduced={reduced}
-      />
+      {videoConfig.background ? (
+        !videoFullscreen &&
+        intensity > 0 && (
+          <div
+            className="studio-video-background"
+            style={{ opacity: intensity }}
+          >
+            <VideoCanvas {...videoProps} background />
+          </div>
+        )
+      ) : (
+        <SignalCanvas
+          signal={signal}
+          background
+          intensity={intensity}
+          quality={quality}
+          reduced={reduced}
+        />
+      )}
+      {videoFullscreen && (
+        <VisualizerPresentation
+          {...videoProps}
+          onClose={closeVideo}
+          onHush={() => send("stop")}
+          playing={playing}
+        />
+      )}
       <header className="topbar">
+        <HeaderParticles
+          reduced={reduced}
+          quality={quality}
+          intensity={intensity}
+        />
         <a
           className="brand"
           href="/"
@@ -1711,6 +1789,11 @@ export function Studio() {
         />
         <div className={"right-panel " + (!right ? "collapsed" : "")}>
           <Toolbox
+            visualizer={
+              !videoFullscreen && (
+                <VisualizerPanel {...videoProps} onPresent={presentVideo} />
+              )
+            }
             tab={tool}
             setTab={setTool}
             signal={signal}

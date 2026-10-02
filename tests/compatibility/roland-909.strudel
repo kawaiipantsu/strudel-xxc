@@ -1,0 +1,7 @@
+// test.strudel
+setcpm(128/4)
+$: s("bd*4").bank("RolandTR909")
+$: s("hh*16").bank("RolandTR909").gain(".5 .3 .8 .3").swingBy(1/6, 4)
+$: s("~ cp ~ cp").bank("RolandTR909").room(0.15)
+$: s("rim(5,16)").bank("RolandTR909").gain(0.3).delay(0.2).delaytime(0.1875)
+$: s("crackle*2").density(0.03).gain(0.1)  // vinyl texture

@@ -263,6 +263,15 @@ dialog::backdrop {
   gap: 24px;
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--bg) 94%, transparent);
+  isolation: isolate;
+}
+.header-particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
 }
 .brand {
   display: flex;
@@ -1138,6 +1147,31 @@ dd {
   font-size: 9px;
   padding: 4px 6px;
 }
+.sample-bank-name {
+  flex: 1;
+  min-width: 0;
+}
+.sample-bank-name b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sample-bank-name small,
+.sample-bank-summary {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.sample-bank-filters {
+  display: flex;
+  gap: 6px;
+}
+.sample-bank-filters select {
+  min-width: 0;
+  flex: 1;
+}
 .sample-card {
   border-bottom: 1px solid var(--line);
   padding: 12px 0;
@@ -1813,6 +1847,9 @@ audio {
   }
   .transport-end button.icon {
     display: none;
+  }
+  .transport-end button[aria-label="Toggle tools"] {
+    display: inline-flex;
   }
   .onboarding {
     left: 65px;

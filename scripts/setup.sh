@@ -11,6 +11,8 @@ if [ ! -f config/secrets.json ]; then
 fi
 ./scripts/permissions.sh
 ./scripts/migrate.sh
+python3 scripts/install-sample-banks.py
+if [ -d assets/vjloops ]; then python3 scripts/install-vjloops.py; fi
 ./scripts/build.sh
 ./scripts/install-maintenance.sh
 ./scripts/healthcheck.sh

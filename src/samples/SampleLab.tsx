@@ -13,6 +13,7 @@ import {
 import { api, download } from "../app/api";
 import { encodeWav, editPCM, trimSilence, resamplePCM } from "../audio/pcm.mjs";
 import type { Media } from "../app/types";
+import { sampleSnippet } from "./sample-code.mjs";
 export function SampleLab({
   ensureProject,
   onInsert,
@@ -436,13 +437,7 @@ export function SampleLab({
             {busy ? "Saving…" : "Save to project"}
           </button>
           {saved && (
-            <button
-              onClick={() =>
-                onInsert(
-                  `\nsamples({ ${name}: ${JSON.stringify(saved.url)} })\n$: s("${name}")\n`,
-                )
-              }
-            >
+            <button onClick={() => onInsert(sampleSnippet(name, saved.url))}>
               Insert into Strudel
               <ArrowRight size={15} />
             </button>

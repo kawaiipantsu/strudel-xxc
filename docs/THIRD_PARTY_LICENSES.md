@@ -8,13 +8,16 @@ This combined application is licensed AGPL-3.0-or-later. Strudel, SuperDough and
 
 ## Media, fonts and artwork
 
-- Original starter samples and example scores: CC0-1.0. Created specifically for this project, using deterministic synthesis in scripts/generate-samples.py. No third-party recordings are bundled.
+- Original starter samples and example scores: CC0-1.0. Created specifically for this project, using deterministic synthesis in scripts/generate-samples.py. Original drums use the xxc_ prefix; tone and xxc_wt retain their names.
 - JetBrains Mono: SIL Open Font License 1.1. The self-hosted variable WOFF2 font comes from @fontsource-variable/jetbrains-mono; the cover-generation TTF is JetBrains Mono v2.304 from the official JetBrains repository. Full OFL text is in LICENSES/JetBrains-Mono-OFL.txt.
 - Lucide SVG icons: ISC license, retained below.
 - Original programmatic identity graphics: distributed with the AGPL application. Brand names and marks remain those of their respective owners.
 - README banner: supplied by the project owner at assets/strudel_xxc_dk_readme_banner.png. It is not presented as a third-party asset or relicensed sample pack.
 - Hydra: hydra-synth is AGPL-3.0; loaded on demand.
-- Soundfont loading is available through the official package. No soundfont bank or questionable remote sample collection is bundled. Users remain responsible for the licenses of external samples and uploaded recordings.
+- The official soundfont package registers 125 General MIDI instruments; audio variants load from the upstream host on first use. No complete soundfont bank is bundled. Installed sample collections have separate attribution and published license status in [LICENSES/samples](../LICENSES/samples/README.md) and [Sample banks](SAMPLE_BANKS.md).
+- The header hexagon trails are an original Canvas implementation inspired by [towc’s particle study](https://codepen.io/towc/pen/mJzOWJ); no CodePen script or remote dependency is embedded.
+- The music-video renderer and its overlay layers are original application code. Inspected visual studies and artist credits are listed in [Visualizer](VISUALIZER.md); no scripts or assets from those demonstrations are bundled.
+- Operator-supplied VJ media is excluded from Git. Pack 1 credits Beeple and retains its supplied notice; Packs 2 and 3 have no supplied license notice. See [VJ Loops](VJ_LOOPS.md) for the import and attribution record.
 - Browser media encoders are platform components. FFmpeg and its codecs are host tooling; no FFmpeg binary is redistributed by this repository.
 
 ## Pinned dependency inventory

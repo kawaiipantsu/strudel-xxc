@@ -89,7 +89,7 @@ export const docs: Record<
   },
   samples: {
     text: "Register a sample map. Use named audio URLs or a strudel.json map. External servers must allow CORS.",
-    example: 'samples({ my_sound: "https://example.org/sound.wav" })',
+    example: "samples({ my_sound: 'https://example.org/sound.wav' })",
     section: "samples",
   },
   macro: {

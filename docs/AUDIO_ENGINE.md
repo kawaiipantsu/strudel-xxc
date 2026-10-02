@@ -16,7 +16,11 @@ The implementation does not substitute a small oscillator engine for Strudel. Mi
 
 ## Startup and stopping
 
-AudioContext creation is lazy in upstream code. Play/Evaluate resumes it after user activation and loads official worklets. Safari may require a second click directly in the editor frame. Hush stops the scheduler and suspends audio, including effects. Loading a shared score never calls evaluation or autoplay.
+AudioContext creation is lazy in upstream code. Play/Evaluate resumes it after user activation and loads official worklets. Safari may require a second click directly in the editor frame. Loading a shared score never calls evaluation or autoplay.
+
+Hush immediately gates the master output, stops the scheduler, finishes any recording, and resets the official SuperDough output/orbit graph before suspending the context. Suspending alone would freeze scheduled voices and effect tails, which could briefly resume when another file starts. Resetting disconnects those old voices while retaining registered samples, decoded sample caches and mixer settings. The next evaluation waits for an in-progress stop and opens the master gate only after evaluation. Already suspended contexts do not receive a redundant suspend request, avoiding a WebKit promise that can remain pending before the first audio gesture.
+
+The browser regression records PCM after switching from a sustained, reverberant score to a different file with an initial rest. That rest must remain silent before the new score begins. Ordinary live updates continue to use Strudel's scheduler without resetting the audio graph.
 
 ## Background music
 
@@ -37,6 +41,8 @@ A 1024-point master analyser supplies decimated waveform and frequency arrays at
 Pattern event views query the actual current pattern around the scheduler’s current cycle. Their data includes note/sample, orbit, gains, effect values and durations. Inline Strudel visuals and source-token highlighting remain official implementations.
 
 Canvas rendering is separate from audio. It caps display resolution, supports low/balanced/high/auto quality, reduces frame rate when rendering is expensive, honors reduced-motion settings and skips decorative work in hidden tabs. Browser scheduling and device limits still affect very large scores.
+
+The separate [Visualizer](VISUALIZER.md) uses this same measured signal for nine generative scenes, four overlay layers and automatic scene changes aligned to Strudel cycles. It adds no audio processing or independent FFT.
 
 ## Recording
 

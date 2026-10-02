@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "snapshotDate": "2026-10-02",
+  "officialPrebake": "https://codeberg.org/uzu/strudel/src/branch/main/website/src/repl/prebake.mjs",
+  "sources": [
+    {
+      "id": "dirt",
+      "name": "Dirt-Samples",
+      "map": "maps/dirt.json",
+      "base": "https://strudel.b-cdn.net/Dirt-Samples/",
+      "repository": "https://github.com/tidalcycles/Dirt-Samples",
+      "revision": "c74fc80f8db8038f6a33648ffef5ac00a07ad402",
+      "license": "Mixed / per-folder notices; no repository-wide license",
+      "author": "Dirt-Samples contributors"
+    },
+    {
+      "id": "piano",
+      "name": "Salamander Piano",
+      "map": "maps/piano.json",
+      "base": "https://strudel.b-cdn.net/piano/",
+      "repository": "https://github.com/felixroos/dough-samples",
+      "revision": "9eacfc86ec4393e68a463ff52b01c19cfaa77f38",
+      "license": "CC-BY-3.0",
+      "author": "Alexander Holm"
+    },
+    {
+      "id": "vcsl",
+      "name": "VCSL",
+      "map": "maps/vcsl.json",
+      "base": "https://strudel.b-cdn.net/VCSL/",
+      "repository": "https://github.com/sgossner/VCSL",
+      "revision": "c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e",
+      "license": "CC0-1.0",
+      "author": "Sam Gossner / Versilian Studios and contributors"
+    },
+    {
+      "id": "machines",
+      "name": "Drum machines",
+      "map": "maps/machines.json",
+      "base": "https://strudel.b-cdn.net/tidal-drum-machines/machines/",
+      "repository": "https://github.com/geikha/tidal-drum-machines",
+      "revision": "6577395a4d05031728ced2ec3e5637fa89d8be48",
+      "license": "No license file published upstream",
+      "author": "Tidal drum machines contributors"
+    },
+    {
+      "id": "uzu",
+      "name": "Uzu drumkit",
+      "map": "maps/uzu.json",
+      "base": "https://strudel.b-cdn.net/uzu-drumkit/",
+      "repository": "https://github.com/tidalcycles/uzu-drumkit",
+      "revision": "2f3e05c70ab4d73ad053a1467adec89bd27377a0",
+      "license": "Unlicense (upstream repository)",
+      "author": "Mot4i, Switch Angel, Ludens"
+    },
+    {
+      "id": "wavetables",
+      "name": "Uzu wavetables",
+      "map": "maps/wavetables.json",
+      "base": "https://strudel.b-cdn.net/uzu-wavetables/",
+      "repository": "https://github.com/tidalcycles/uzu-wavetables",
+      "revision": "3432ce3f35746356728f9bea3fea4b76624f98cd",
+      "license": "No license file published upstream",
+      "author": "Uzu wavetables contributors"
+    },
+    {
+      "id": "mridangam",
+      "name": "Mridangam",
+      "map": "maps/mridangam.json",
+      "base": "https://strudel.b-cdn.net/mrid/",
+      "repository": "https://github.com/yaxu/mrid",
+      "revision": "5ba409cabb2893e6e8a52a15a2812c35585cdadb",
+      "license": "CC-BY-SA-4.0",
+      "author": "Arthur Carabott (2022), performer Harishankar V. Menon"
+    }
+  ]
+}

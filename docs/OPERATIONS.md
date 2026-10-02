@@ -11,6 +11,10 @@ git pull --ff-only
 ./scripts/healthcheck.sh
 ```
 
+On first installation or when the committed sample lock changes, run `python3 scripts/install-sample-banks.py` before building. The normal build verifies the installed hashes without downloading. Samples stay outside the web root and are not removed by cleanup. See [Sample banks](SAMPLE_BANKS.md).
+
+To add or change local VJ packs, run `python3 scripts/install-vjloops.py` before building. Normal builds only verify existing clips. Originals under `assets/vjloops/` and generated `storage/vjloops/` are outside Git; back them up separately. See [VJ Loops](VJ_LOOPS.md).
+
 Run `./scripts/test.sh` for a complete verification. The build does not erase PHP entry points or runtime media. The service worker is versioned from active asset names and uses network-first requests. No release artifacts or GitHub Releases are needed for this web deployment.
 
 The source archive is generated from the current committed revision, so commit and push reviewed changes before packaging it. `scripts/install-maintenance.sh` installs the cron/logrotate entries and backs up any existing files before changing them. Initial setup runs it automatically.

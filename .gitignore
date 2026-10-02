@@ -1,4 +1,7 @@
 node_modules/
+assets/vjloops/
+public/vjloops/
+html/vjloops/
 config/secrets.json
 config/db-setup.txt
 docs/ADMIN_CREDS.md
@@ -8,6 +11,8 @@ html/assets/
 html/brand/
 html/fonts/
 html/samples/
+html/sample-banks/
+public/sample-banks/
 html/index.html
 html/sandbox/index.html
 html/admin/index.html

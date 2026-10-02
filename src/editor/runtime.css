@@ -94,7 +94,8 @@ body[data-theme="light"] {
   border: 1px solid #888;
 }
 
-#enable-audio {
+#enable-audio,
+#repair-sample-urls {
   position: fixed;
   left: 50%;
   top: 45%;
@@ -112,6 +113,7 @@ body[data-theme="light"] {
   max-width: 90%;
   white-space: nowrap;
 }
-#enable-audio:focus-visible {
+#enable-audio:focus-visible,
+#repair-sample-urls:focus-visible {
   outline: 2px solid #fff;
 }

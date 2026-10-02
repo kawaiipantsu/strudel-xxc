@@ -2,6 +2,7 @@ import "./runtime.css";
 import { createMidiBridge } from "./midi-bridge";
 import { encodeFloatWav } from "../audio/pcm.mjs";
 import { createSchedulerClock } from "../audio/scheduler-clock";
+import { sampleQuoteRepairs } from "../samples/sample-code.mjs";
 import * as core from "@strudel/core";
 import * as mini from "@strudel/mini";
 import * as tonal from "@strudel/tonal";
@@ -57,6 +58,8 @@ let mirror: any,
   muted = false,
   volume = 0.75,
   generation = 0;
+let hushed = true;
+let stopPending: Promise<void> | undefined;
 let tap: GainNode | undefined,
   analyser: AnalyserNode | undefined,
   stereo: AnalyserNode[] = [];
@@ -121,7 +124,7 @@ function wireAudio() {
   if (out !== tap) {
     tap?.disconnect();
     tap = out;
-    tap!.gain.value = muted ? 0 : volume;
+    tap!.gain.value = muted || hushed ? 0 : volume;
     analyser = ac.createAnalyser();
     analyser!.fftSize = 1024;
     tap!.connect(analyser!);
@@ -133,7 +136,7 @@ function wireAudio() {
       splitter.connect(a, i);
     });
   }
-  tap!.gain.setTargetAtTime(muted ? 0 : volume, ac.currentTime, 0.02);
+  tap!.gain.setTargetAtTime(muted || hushed ? 0 : volume, ac.currentTime, 0.02);
   const nodes = audio.getSuperdoughAudioController().nodes;
   Object.entries(nodes).forEach(([id, o]: [string, any]) => {
     let m = orbitMix.get(id);
@@ -236,6 +239,7 @@ async function enable() {
 
 async function evaluate(mode = "all") {
   if (document.hidden && !allowBackgroundMusic) return;
+  if (stopPending) await stopPending;
   await enable();
   playingFileKey = fileKey;
   const view = mirror.editor;
@@ -259,14 +263,74 @@ async function evaluate(mode = "all") {
     code = code.slice(0, from).replace(/[^\n]/g, " ") + code.slice(from, to);
   }
   mirror.editor.dispatch(setDiagnostics(mirror.editor.state, []));
+  const repairs = sampleQuoteRepairs(code);
+  if (repairs.length) {
+    let button = document.getElementById(
+      "repair-sample-urls",
+    ) as HTMLButtonElement | null;
+    if (!button) {
+      button = document.createElement("button");
+      button.id = "repair-sample-urls";
+      document.body.append(button);
+    }
+    button.textContent = "REPAIR SAMPLE MAP QUOTES & PLAY";
+    button.onclick = () => {
+      // Recompute against the current document so edits made while the prompt is visible are safe.
+      const changes = sampleQuoteRepairs(view.state.doc.toString());
+      if (changes.length)
+        view.dispatch({ changes, userEvent: "input.sample-repair" });
+      button?.remove();
+      send("log", {
+        message:
+          "Sample map strings changed to single quotes. The change is visible in the editor and can be undone.",
+      });
+      evaluate(mode).catch(fail);
+    };
+    send("error", {
+      message:
+        "Sample maps need single-quoted strings. Double quotes invoke mini notation. Use REPAIR SAMPLE MAP QUOTES & PLAY in the editor, or reinsert the sample.",
+    });
+    return;
+  }
+  document.getElementById("repair-sample-urls")?.remove();
   await mirror.repl.evaluate(code, true, mode === "all");
+  hushed = false;
   wireAudio();
 }
-async function stop() {
-  mirror?.stop();
-  if (captureState !== "inactive") await record("stop");
-  await audio.getAudioContext().suspend();
-  send("playing", { playing: false });
+function stop(): Promise<void> {
+  if (stopPending) return stopPending;
+  const work = async () => {
+    hushed = true;
+    const ac = audio.getAudioContext();
+    tap?.gain.cancelScheduledValues(ac.currentTime);
+    tap?.gain.setValueAtTime(0, ac.currentTime);
+    mirror?.stop();
+    const recordingStopped =
+      captureState !== "inactive" ? record("stop") : Promise.resolve();
+    // Suspending alone freezes old scheduled voices and delay tails. Reset the official
+    // output/orbit graph so those nodes can never rejoin the next score on resume.
+    if (audioInitialized) audio.resetGlobalEffects();
+    for (const orbit of orbitMix.values()) {
+      orbit.gain.disconnect();
+      orbit.pan.disconnect();
+      orbit.analyser.disconnect();
+    }
+    orbitMix.clear();
+    tap = undefined;
+    analyser = undefined;
+    stereo = [];
+    wave.fill(0);
+    fft.fill(0);
+    await recordingStopped;
+    // WebKit can leave suspend() pending on a context that has never been unlocked.
+    // An already suspended context needs no additional state transition.
+    if (ac.state === "running") await ac.suspend();
+    send("playing", { playing: false });
+  };
+  stopPending = work().finally(() => {
+    stopPending = undefined;
+  });
+  return stopPending;
 }
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
@@ -413,6 +477,8 @@ function tick(now: number) {
     return Math.sqrt(b.reduce((s, v) => s + v * v, 0) / b.length);
   };
   send("frame", {
+    sampleRate: ac.sampleRate,
+    fftBinHz: (ac.sampleRate / (analyser?.fftSize || 1024)) * 4,
     wave: Array.from(wave.filter((_, i) => i % 4 === 0)),
     fft: Array.from(fft.filter((_, i) => i % 4 === 0)),
     rms: playing ? rms : 0,
@@ -492,6 +558,7 @@ function command(cmd: string, arg?: any) {
 }
 let features = { hydra: true, midi: true };
 async function main() {
+  const soundfonts = await import("@strudel/soundfonts");
   await core.evalScope(
     core,
     mini,
@@ -501,7 +568,7 @@ async function main() {
     cm,
     import("@strudel/xen"),
     import("@strudel/gamepad"),
-    import("@strudel/soundfonts"),
+    soundfonts,
     import("@strudel/serial"),
     import("@strudel/osc"),
     { macro },
@@ -526,18 +593,55 @@ async function main() {
   });
   await audio.registerSynthSounds();
   await audio.registerZZFXSounds();
+  // The official REPL registers the GM instrument names at startup; their audio loads on demand.
+  soundfonts.registerSoundfonts();
+  send("log", {
+    message: "General MIDI soundfonts registered; audio loads on first use.",
+  });
   await audio.samples(
     {
-      bd: "/samples/bd.wav",
-      sd: "/samples/sd.wav",
-      hh: "/samples/hh.wav",
-      oh: "/samples/oh.wav",
-      cp: "/samples/cp.wav",
-      rim: "/samples/rim.wav",
+      xxc_bd: "/samples/bd.wav",
+      xxc_sd: "/samples/sd.wav",
+      xxc_hh: "/samples/hh.wav",
+      xxc_oh: "/samples/oh.wav",
+      xxc_cp: "/samples/cp.wav",
+      xxc_rim: "/samples/rim.wav",
       tone: "/samples/tone.wav",
     },
     ORIGIN,
   );
+  try {
+    const response = await fetch(ORIGIN + "/sample-banks/runtime.json", {
+      cache: "no-cache",
+    });
+    if (!response.ok)
+      throw new Error("Sample catalogue HTTP " + response.status);
+    const catalogue = await response.json();
+    // Keep official pitched maps, variant order, wt_ handling and bank aliases.
+    // Only the audio URLs change to the installed, verified local mirror.
+    for (const collection of catalogue.collections)
+      await audio.samples(collection.map, "", {
+        prebake: true,
+        tag:
+          collection.id === "machines" ||
+          collection.id === "uzu" ||
+          collection.id === "mridangam"
+            ? "drum-machines"
+            : undefined,
+      });
+    await audio.aliasBank(catalogue.aliases);
+    send("log", {
+      message: `Sample banks ready: ${catalogue.stats.sounds} sounds / ${catalogue.stats.files} local audio files.`,
+    });
+  } catch (error) {
+    // Keep the editor usable during a failed/offline installation, but make missing banks explicit.
+    fail(
+      new Error(
+        "Default sample banks unavailable. Reload when online or reinstall the sample banks. " +
+          String(error),
+      ),
+    );
+  }
   mirror = new cm.StrudelMirror({
     root: document.getElementById("editor"),
     initialCode: "// Loading project…",
@@ -727,6 +831,7 @@ async function main() {
           break;
         }
         case "load": {
+          document.getElementById("repair-sample-urls")?.remove();
           loading = true;
           const key = String(d.projectKey || "draft") + ":" + d.file;
           const code = String(d.code).slice(0, 1000000);

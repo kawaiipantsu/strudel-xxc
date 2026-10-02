@@ -56,7 +56,7 @@ Inline sliders use Strudel’s own widget state. The editor retains mini-notatio
 
 ## Samples and optional integrations
 
-The default sample bank is original, deterministic, CC0 synthesis. No third-party sample collection or font bank is automatically downloaded. `samples()`, custom maps, wavetables and `loadSoundfont()` retain the official APIs. External resources need HTTPS and host CORS permission.
+The current official default sample catalogue and full Dirt-Samples collection are installed locally, with versioned maps and an audio hash lock. Official `samples()` and `aliasBank()` register them before the editor becomes ready. Bare drum names use the current Uzu default kit; original procedural drums remain under `xxc_` names. See [Sample banks](SAMPLE_BANKS.md) for storage, attribution, exact counts and compatibility examples. The official `registerSoundfonts()` registers all 125 General MIDI names at startup. Their chosen audio variants load on demand from the upstream host; no complete soundfont bank is bundled. `samples()`, custom maps, wavetables and `loadSoundfont()` retain the official APIs. External resources need HTTPS and host CORS permission.
 
 `xxc_wt` is an original four-frame, 2048-sample wavetable handled by official SuperDough. Hydra needs WebGL. MIDI and microphone require real user permissions and hardware/browser support. WebSerial availability is shown honestly; opaque-origin restrictions can prevent native access. Official OSC code is present but its default local bridge is not a public HTTPS service. No bridge is installed, and mixed-content browser restrictions still apply.
 

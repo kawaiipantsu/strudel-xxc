@@ -2,21 +2,9 @@
 
 Application: **https://strudel.xxc.dk**
 
-Frontend build: **05412c3f4917**
+Frontend build: **43d8d08021a8**
 
-## New empty workspace update
-
-The TypeScript check and production build pass. `npx playwright test tests/e2e/new-project.spec.ts tests/e2e/studio.spec.ts` passes **12 workflow tests**, six each in Chromium and WebKit.
-
-The new cases exercise a delayed save followed immediately by New, a blank editor with isolated undo state and a distinct project identity, save/reload without demo tabs, preservation of edits recovered from local storage, reopening the previous project through Recent projects, a mobile library deep link followed by New and reload, unchanged public score data, and a failed checkpoint leaving the current work intact. Existing playback, recording, themes, sample editing, sharing and project-save workflows also pass.
-
-Desktop and mobile layouts were visually inspected. New remains visible on a 390-pixel viewport. Health checks report the database, Redis, storage, FFmpeg and cover renderer ready.
-
-## Earlier complete verification
-
-The following full-system results were recorded for build **0dd550dc6dde**, before the New workspace update. The update changes frontend project handling only.
-
-Test command: `./scripts/test.sh`
+Commands: `./scripts/build.sh` followed by `./scripts/test.sh`.
 
 ## Results
 
@@ -24,14 +12,36 @@ Test command: `./scripts/test.sh`
 |---|---|
 | TypeScript check and production Vite build | Pass |
 | PHP syntax checks for backend, public entry points and scripts | Pass |
-| PCM editing/encoding unit tests | 4 passed |
+| PCM, generated sample code and visual director unit tests | 10 passed |
 | HTTPS backend integration checks | 52 passed |
-| Browser end-to-end tests | 16 passed, 8 each in Chromium and WebKit |
+| System sample delivery/security checks | 29 passed |
+| VJ delivery, formats, permissions and Git exclusions | 18 passed |
+| Browser end-to-end tests | 48 passed, 24 each in Chromium and WebKit |
 | `npm audit --omit=dev` | 0 vulnerabilities reported |
 | Database, Redis, storage, FFmpeg and SVG renderer health | Ready |
 | Public ownership and private credential permissions | Verified |
 
-The browser suite completed in 55.0 seconds without retries. Tests use the Playwright 1.63.0 browser versions and the deployed HTTPS origin. Initial development also used the host's system Chromium. Linux WebKit does not reproduce every Safari/iOS hardware configuration.
+The final browser suite completed in 4.7 minutes without retries against the deployed HTTPS origin. These results include the optimized VJ encodings and the General MIDI startup fix. Browser automation uses Playwright 1.63.0. Linux WebKit does not reproduce every Safari/iOS hardware configuration.
+
+## Default sounds and sample insertion
+
+The local catalogue contains 1,063 sound names and 6,325 distinct audio files. Every installed byte hash is checked against the committed audio lock. Browser tests run the supplied 909, piano, `misc` and external Dirt sample scores unchanged, measure nonzero output, and check for runtime errors. They test individual 909 voices, the TR909 alias, crackle, VCSL, mridangam and wavetables. Local-bank tests block the upstream sample hosts to verify that defaults work from this server.
+
+All 29 piano recordings decode through the deployed endpoint in both browsers. A metadata ownership regression was corrected in the installer's atomic writer; all metadata files retain PHP group readability after verification/build.
+
+The official soundfont startup registration exposes 125 General MIDI names. Tests play `gm_piano` and `gm_electric_bass_finger` separately and together using the real upstream soundfont loader. The suite does not claim to play every soundfont variant.
+
+Sample Lab upload → crop → normalize → save → Insert produces a single-quoted sample map and audible playback. Legacy double-quoted maps offer an explicit, undoable repair; the original musical mini-notation strings remain intact.
+
+## Hush and visual playback
+
+A PCM regression switches from sustained, reverberant audio to another file with an initial rest. The first 0.6 seconds remain below 0.00001 peak amplitude, followed by audible new notes. Hush clears the old voices/effect routing before resuming. A fresh WebKit workspace also starts successfully without a pending suspend promise blocking Play.
+
+The nine generated scenes produce distinct frames from real audio. Tests cover overlays, persisted settings, automatic changes driven by Strudel cycles, reduced motion, studio background, native/window fullscreen, PNG export, returning from fullscreen, and mobile drawers. The fullscreen dialog is checked with hit testing to ensure it appears above the editor immediately.
+
+All 146 supplied VJ clips are inspected as H.264 with 8-bit 4:2:0 video, no more than 1920 pixels wide. The 58 browser conversions use a 1280-pixel width cap and bounded bitrate; compatible original MP4s remain unchanged. Browser tests play representative clips from all three packs, assert actual playback-time progress and muted video audio, switch clips, retain overlays, capture PNGs, and preserve selection through fullscreen. They verify automatic changes, pause on Hush, release on hidden tabs, mobile presentation and persisted settings.
+
+The initial MOV remuxes reduced available space below the application's upload reserve. Optimized derived copies now total 196,457,380 bytes, with approximately 2.3 GiB free on the host. The application's 2 GiB reserve was retained. The complete upload, recording, cover and WAV/MP3/M4A export checks pass after optimization. Original videos and generated media remain outside Git and the public web root.
 
 ## What the browser tests measure
 
@@ -62,7 +72,7 @@ They also check unlisted noindex behavior, public-only sitemap inclusion, share 
 
 ## Visual and deployment checks
 
-Dark and light screenshots in `assets/screenshots/` were captured during actual playback. The supplied README banner is retained at its original path. The manifest, favicon assets, server-rendered share pages, canonical HTTPS links and sitemap are served by the existing Apache/PHP deployment. No Node production listener is used.
+Dark, light, mobile, generated fullscreen and VJ fullscreen views were inspected during actual playback. The generated-scene screenshot in `assets/screenshots/music-video.png` contains only original application graphics; VJ video frames remain outside Git. The supplied README banner is retained at its original path. The manifest, favicon assets, server-rendered share pages, canonical HTTPS links and sitemap are served by the existing Apache/PHP deployment. No Node production listener is used.
 
 The application installed only its own hourly cleanup cron and log rotation configuration; it did not replace the Apache vhost. Uploaded/generated assets remain under private `storage/`, outside `html/`.
 

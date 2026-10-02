@@ -38,6 +38,7 @@ Publish a score, read someone else’s code, and make a remix.
 | **Editor** | Official Strudel CodeMirror integration: mini notation, event highlighting, sliders, inline visuals, completion, folding, search, multiple files and a command palette. |
 | **Audio** | Official Strudel + SuperDough, independent orbits, master control, measured stereo/orbit levels and PCM recording through an AudioWorklet. |
 | **Signal workbench** | Scope, FFT spectrum/spectrogram, stereo phase plot, pattern events, piano roll, spiral and geometry. Background animation follows actual audio and events. |
+| **Visualizer** | Nine generated scenes, 146 VJ loop clips in three packs, four overlay layers and a fullscreen Music Video mode with automatic scene changes. Optional studio background and PNG snapshots. |
 | **Sample Lab** | Microphone recording, upload, waveform selection, crop, cut, duplicate, reverse, fades, normalize, gain, looping, resampling and WAV export. |
 | **Recording** | Uncompressed float PCM source; server exports WAV, 320 kbps MP3 and 256 kbps AAC/M4A with metadata and compatible PNG artwork. |
 | **Projects** | Local crash recovery, server autosave, revision checkpoints, private/unlisted/public visibility, ZIP bundles and remix provenance. |
@@ -54,6 +55,15 @@ The visual language brings together [THUGS(red)](https://thugs.red), [XXC / WAF]
 <summary>Light / engineering paper theme</summary>
 
 ![Light studio with live Strudel playback](assets/screenshots/studio-light.png)
+
+</details>
+
+<details>
+<summary>Fullscreen generative music video</summary>
+
+![Live music visualization driven by Strudel output](assets/screenshots/music-video.png)
+
+Choose generated scenes or your local VJ loop packs in the Visualizer. [Visualizer guide](docs/VISUALIZER.md) · [VJ loop guide](docs/VJ_LOOPS.md).
 
 </details>
 
@@ -78,7 +88,7 @@ $: n("0 ~ 4 7 ~ 3 2 ~").scale("C4:minor")
   ._pianoroll()
 ```
 
-The built-in `bd`, `sd`, `hh`, `oh`, `cp`, `rim`, `tone` and `xxc_wt` sounds are original procedural CC0 assets. External maps work through Strudel’s normal `samples()` and `tables()` APIs when their hosts permit browser access.
+The default Strudel banks are installed locally: **1,063 sounds / 6,325 audio files**, including Roland drum machines, Salamander piano, Uzu drums (`misc` included), VCSL, mridangam, wavetables and the full Dirt collection. The original procedural drums remain available as `xxc_bd`, `xxc_sd`, `xxc_hh`, `xxc_oh`, `xxc_cp` and `xxc_rim`, alongside `tone` and `xxc_wt`. Browse, preview and insert sounds in **SAMPLES**. The 125 official `gm_*` General MIDI instruments are also registered; soundfont audio loads from the upstream host when first played. External maps still use the official `samples()` and `tables()` APIs. [Sample guide and attribution](docs/SAMPLE_BANKS.md).
 
 ## Architecture
 
@@ -161,7 +171,7 @@ Hydra needs WebGL. MIDI needs browser support and an explicit connection in Cont
 
 ## Verification
 
-**14 browser tests · 52 backend checks · 4 audio utility tests passed.** The suite exercises actual signal output, captured PCM, codecs, permissions and sharing on the deployed HTTPS origin. See the [verification report](docs/VERIFICATION.md) for scope and hardware boundaries.
+**48 browser tests · 99 backend/media checks · 10 unit tests passed.** The suite exercises actual signal output, captured PCM, codecs, permissions and sharing on the deployed HTTPS origin. See the [verification report](docs/VERIFICATION.md) for scope and hardware boundaries.
 
 ## Documentation
 
@@ -175,6 +185,9 @@ Hydra needs WebGL. MIDI needs browser support and an explicit connection in Cont
 | [Security](docs/SECURITY.md) | Execution isolation and storage policy |
 | [Strudel integration](docs/STRUDEL_INTEGRATION.md) | Packages, upstream APIs and compatibility |
 | [Audio engine](docs/AUDIO_ENGINE.md) | Routing, PCM, meters and encoding |
+| [Sample banks](docs/SAMPLE_BANKS.md) | Default sounds, external maps, installation and attribution |
+| [Visualizer](docs/VISUALIZER.md) | Live music video, scenes, overlays and fullscreen |
+| [VJ Loops](docs/VJ_LOOPS.md) | Video packs, playback, storage and local import |
 | [Storage](docs/STORAGE.md) | Ownership, sample URLs, bundles and retention |
 | [Third-party licenses](docs/THIRD_PARTY_LICENSES.md) | Complete pinned inventory and notices |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Playback, Safari, permissions and recovery |
@@ -189,7 +202,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Changes to the audio runtime need browse
 
 The application is **AGPL-3.0-or-later**, consistent with the [official Strudel integration guidance](https://strudel.cc/technical-manual/project-start/). Network users can access the complete application source here and through the studio’s source link. License notices, build scripts and the dependency lock are included. Operators of modified deployments must provide their corresponding source as required by the license.
 
-Original bundled sample waveforms and example scores are **CC0-1.0**. Third-party packages, fonts and icons keep their respective notices. User compositions and uploaded media remain subject to their owners’ chosen rights; publishing does not silently assign a new license to them.
+Original bundled sample waveforms and example scores are **CC0-1.0**. Third-party samples, packages, fonts and icons keep their respective notices. [Sample attribution and published license status](LICENSES/samples/README.md) are recorded separately. User compositions and uploaded media remain subject to their owners’ chosen rights; publishing does not silently assign a new license to them.
 
 ---
 
