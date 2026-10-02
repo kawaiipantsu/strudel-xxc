@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /sandbox/
+Sitemap: https://strudel.xxc.dk/sitemap.xml

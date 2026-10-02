@@ -1,0 +1,117 @@
+@import "@fontsource-variable/jetbrains-mono";
+:root {
+  color-scheme: dark;
+  --background: #0d1016;
+  --foreground: #d6dbe4;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#editor {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  color: var(--foreground);
+}
+body {
+  font-family: "JetBrains Mono Variable", monospace;
+}
+#editor {
+  position: relative;
+  z-index: 2;
+}
+.cm-editor {
+  height: 100%;
+}
+.cm-scroller {
+  overflow: auto !important;
+  line-height: 1.8 !important;
+}
+.cm-content {
+  padding: 22px 0 200px !important;
+}
+.cm-line {
+  padding-left: 14px !important;
+}
+.cm-gutters {
+  background: transparent !important;
+  border: 0 !important;
+  padding-left: 10px;
+  color: #697485 !important;
+}
+.cm-activeLine,
+.cm-activeLineGutter {
+  background: #7777770c !important;
+}
+.cm-cursor {
+  border-left: 2px solid #ff3b47 !important;
+}
+.cm-tooltip {
+  max-width: 420px;
+  padding: 8px;
+  border: 1px solid #444 !important;
+  font-size: 12px;
+}
+.strudel-tooltip p {
+  margin: 6px;
+}
+.cm-selectionBackground {
+  background: #ff3b4733 !important;
+}
+.cm-slider input {
+  accent-color: #ff3b47;
+}
+.cm-foldPlaceholder {
+  background: transparent !important;
+}
+#runtime-error {
+  position: fixed;
+  bottom: 5px;
+  right: 12px;
+  z-index: 10;
+  font-size: 11px;
+  color: #ff8790;
+}
+canvas {
+  opacity: 0.65;
+}
+body[data-theme="light"] {
+  --background: #f4f2eb;
+  --foreground: #20242d;
+  color-scheme: light;
+}
+.cm-panel.cm-search {
+  font:
+    12px "JetBrains Mono Variable",
+    monospace;
+  padding: 12px !important;
+}
+.cm-search input {
+  color: inherit;
+  background: transparent;
+  border: 1px solid #888;
+}
+
+#enable-audio {
+  position: fixed;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+  border: 1px solid #ff3b47;
+  background: #161c25;
+  color: #fff;
+  padding: 18px 24px;
+  font:
+    12px "JetBrains Mono Variable",
+    monospace;
+  cursor: pointer;
+  box-shadow: 0 0 0 9999px #0006;
+  max-width: 90%;
+  white-space: nowrap;
+}
+#enable-audio:focus-visible {
+  outline: 2px solid #fff;
+}

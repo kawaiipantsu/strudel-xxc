@@ -1,0 +1,5 @@
+<IfModule mod_headers.c>
+Header always set Content-Security-Policy "sandbox allow-scripts; default-src 'none'; script-src 'self' https: blob: data: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src https: data: blob:; connect-src https: wss:; media-src https: blob: data:; worker-src blob: data:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+Header set Access-Control-Allow-Origin "*"
+Header set Cache-Control "no-cache"
+</IfModule>

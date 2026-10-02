@@ -1,0 +1,3 @@
+// URL loading uses the same CORS path as an external HTTPS audio host.
+samples({ external_tone: 'https://strudel.xxc.dk/samples/tone.wav' })
+s("external_tone*2").gain(.3).room(.1)

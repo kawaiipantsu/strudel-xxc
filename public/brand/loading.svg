@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><style>@media(prefers-reduced-motion:reduce){*{animation:none!important}}path{transform-origin:center;animation:r 3s linear infinite}@keyframes r{to{transform:rotate(360deg)}}</style><path d="M32 12a20 20 0 1 1-20 20a12 12 0 1 1 12 12a6 6 0 1 1 6-6" stroke="#ff3b47" fill="none" stroke-width="2"/></svg>

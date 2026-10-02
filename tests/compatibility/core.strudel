@@ -1,0 +1,6 @@
+setcps(.5)
+$: stack(s("bd*4"), s("~ sd ~ sd"), s("hh*8").gain(.15)).gain(.4).orbit(0)
+$: note("c3 eb3 g3 bb3").s("sawtooth").lpf(900).lpq(2)
+  .attack(.01).decay(.2).sustain(0).release(.1).gain(.15).orbit(1)
+$: n("0 4 ~ 7").scale("C4:minor").s("triangle")
+  .delay(.3).room(.4).gain(.15).orbit(2)

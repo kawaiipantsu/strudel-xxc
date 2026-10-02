@@ -1,0 +1,300 @@
+.admin-login {
+  width: 440px;
+  max-width: calc(100vw - 40px);
+  margin: 10vh auto;
+}
+.admin-login > img {
+  width: 54px;
+  margin-bottom: 28px;
+}
+.admin-login h1 {
+  font-size: 32px;
+  letter-spacing: -1px;
+}
+.admin-login p {
+  color: var(--muted);
+  font-size: 11px;
+}
+.admin-login form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 30px 0;
+}
+.admin-login label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.admin-login input {
+  padding: 12px;
+}
+.admin-login button {
+  padding: 13px;
+}
+.admin-shell {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.admin-workspace {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+.admin-nav {
+  width: 225px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  padding: 23px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow: auto;
+}
+.admin-nav button {
+  justify-content: flex-start;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  padding: 13px;
+  border: 0;
+  gap: 12px;
+  color: var(--muted);
+}
+.admin-nav a {
+  margin: 30px 12px;
+}
+.admin-main {
+  flex: 1;
+  overflow: auto;
+  padding: 35px 45px;
+  min-width: 0;
+}
+.admin-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+.admin-heading h1 {
+  font-size: 28px;
+  letter-spacing: -1px;
+  margin: 12px 0;
+}
+.admin-heading > span {
+  font-size: 10px;
+}
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin: 25px 0 35px;
+}
+.admin-stats article {
+  border: 1px solid var(--line);
+  padding: 22px;
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.admin-stats span {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.admin-stats b {
+  font-size: 27px;
+  font-weight: 500;
+}
+.admin-main h2 {
+  font-size: 14px;
+  margin: 35px 0 20px;
+  letter-spacing: 1px;
+}
+.service-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.service-grid > div {
+  border: 1px solid var(--line);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  font-size: 10px;
+}
+.service-grid span {
+  color: var(--muted);
+}
+.service-grid b {
+  font-weight: 500;
+  text-align: right;
+}
+.admin-table-wrap {
+  overflow: auto;
+  margin: 20px 0;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 11px;
+  text-align: left;
+}
+th {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--faint);
+  font-weight: 500;
+}
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 16px 12px;
+  vertical-align: top;
+  font-size: 10px;
+  max-width: 350px;
+}
+td small {
+  display: block;
+  color: var(--muted);
+  font-size: 9px;
+  margin-top: 5px;
+}
+td select,
+td button {
+  font-size: 9px;
+  padding: 6px 9px;
+}
+td .toolbar {
+  margin: 0;
+  gap: 6px;
+}
+td audio {
+  width: 200px;
+  display: block;
+  margin-top: 15px;
+}
+.media-thumb {
+  width: 80px;
+  margin-top: 10px;
+  display: block;
+}
+.admin-settings {
+  max-width: 920px;
+  margin: 30px 0;
+}
+.admin-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 35px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 0;
+  font-size: 11px;
+}
+.admin-setting > span {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.7px;
+}
+.admin-setting > input:not([type="checkbox"]),
+.admin-setting > select {
+  width: 60%;
+  font-size: 11px;
+}
+.admin-setting > input[type="color"] {
+  width: 90px !important;
+  padding: 3px;
+}
+.error-box {
+  border: 1px solid var(--accent);
+  padding: 14px;
+  color: var(--accent);
+  font-size: 11px;
+  margin: 20px 0;
+}
+.notice {
+  color: var(--ok);
+  border: 1px solid var(--ok);
+  padding: 14px;
+  font-size: 11px;
+  margin: 15px 0;
+}
+.logs {
+  max-height: 65vh;
+  overflow: auto;
+}
+@media (max-width: 1000px) {
+  .admin-nav {
+    width: 185px;
+  }
+  .admin-main {
+    padding: 25px;
+  }
+  .admin-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .service-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .admin-workspace {
+    flex-direction: column;
+  }
+  .admin-nav {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+    flex-shrink: 0;
+    padding: 10px;
+  }
+  .admin-nav button {
+    white-space: nowrap;
+    font-size: 9px;
+    padding: 9px;
+  }
+  .admin-nav a {
+    display: none;
+  }
+  .admin-main {
+    padding: 23px 16px;
+  }
+  .admin-heading h1 {
+    font-size: 23px;
+  }
+  .admin-stats {
+    gap: 10px;
+  }
+  .admin-stats article {
+    padding: 15px;
+  }
+  .admin-stats b {
+    font-size: 22px;
+  }
+  .admin-shell .topbar {
+    gap: 8px;
+  }
+  .admin-shell .topbar button {
+    font-size: 9px;
+    padding: 6px;
+  }
+  .admin-shell .topbar button:first-of-type {
+    display: none;
+  }
+  .admin-setting {
+    gap: 12px;
+  }
+  .admin-setting > span {
+    font-size: 8px;
+  }
+}

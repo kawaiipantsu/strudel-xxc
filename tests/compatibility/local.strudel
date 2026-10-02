@@ -1,0 +1,5 @@
+// 1. Open Sample Lab and upload/record a sound.
+// 2. Save to project and choose Insert into Strudel.
+// 3. Evaluate the inserted sample map and s("name") pattern.
+// Private media URLs are renewed when a saved project is opened.
+s("tone").gain(.25)

@@ -1,0 +1,28 @@
+name: Bug report
+description: A reproducible problem with the studio
+labels: [bug]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Include what you expected and how to reproduce the problem.
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and operating system
+    validations:
+      required: true
+  - type: textarea
+    id: score
+    attributes:
+      label: Smallest useful Strudel score
+      description: Remove private sample URLs and unrelated code.
+      render: javascript
+  - type: textarea
+    id: output
+    attributes:
+      label: Relevant Output / Problems messages
+      description: Never include credentials, tokens or private media links.

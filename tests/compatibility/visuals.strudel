@@ -1,0 +1,4 @@
+setcps(.5)
+$: s("bd*4").gain(.3)._scope()
+$: note("c3 eb3 g3 bb3").s("sawtooth").lpf(slider(600,100,2000)).gain(.1)._pianoroll()
+$: n("0 2 4 7").scale("C4:minor").s("sine").gain(.1)._spiral({ steady: .96 })

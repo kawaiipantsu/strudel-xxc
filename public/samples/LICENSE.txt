@@ -1,0 +1,5 @@
+XXC / THUGS(red) original procedural starter sounds and wavetable.
+Dedicated to the public domain under CC0-1.0.
+Generated from scripts/generate-samples.py with a fixed random seed.
+No sampled recordings or third-party sound packs are used.
+https://creativecommons.org/publicdomain/zero/1.0/

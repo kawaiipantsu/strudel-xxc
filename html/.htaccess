@@ -1,0 +1,33 @@
+Options -Indexes -MultiViews +SymLinksIfOwnerMatch
+DirectoryIndex index.php index.html
+RewriteEngine On
+RewriteRule ^(?:config|storage|backend|docs|node_modules|\.git)(?:/|$) - [F,L]
+RewriteRule (^|/)\. - [F,L]
+RewriteRule ^api(?:/(.*))?$ api/index.php?route=$1 [QSA,L]
+RewriteRule ^media/([a-f0-9-]+)$ media.php?id=$1 [QSA,L]
+RewriteRule ^p/([a-z0-9-]+)$ share.php?slug=$1 [QSA,L]
+RewriteRule ^library/?$ library.php [L]
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set Permissions-Policy "camera=(), microphone=(self), midi=(self), serial=(self), geolocation=()"
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; media-src 'self' blob:; frame-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'; form-action 'self'; worker-src 'self' blob:"
+<FilesMatch "\.(js|mjs|css|woff2|wav|json)$">
+Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+</IfModule>
+<IfModule mod_php.c>
+php_value upload_max_filesize 128M
+php_value post_max_size 130M
+php_value max_execution_time 120
+php_value memory_limit 256M
+php_flag display_errors Off
+</IfModule>
+
+<IfModule mod_headers.c>
+<FilesMatch "^(sw\.js|index\.html|manifest\.webmanifest)$">
+Header set Cache-Control "no-cache"
+</FilesMatch>
+</IfModule>

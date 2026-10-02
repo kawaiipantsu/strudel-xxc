@@ -1,0 +1,5 @@
+// Open Controls → Connect MIDI. Select a real/virtual output first.
+// The official @strudel/midi package handles events and clock timing.
+setcps(.5)
+$: note("c3 eb3 g3 bb3").midi()
+// Optional: $: midicmd("clock*96").midi()
