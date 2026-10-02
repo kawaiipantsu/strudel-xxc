@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """HTTP integration tests. Own isolated anonymous session; removes only resources it creates."""
+from html.parser import HTMLParser
 import urllib.request,urllib.error,http.cookiejar,json,uuid,io,zipfile,pathlib,re,os,tempfile,subprocess
 BASE='https://strudel.xxc.dk';cookie=http.cookiejar.CookieJar();client=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie));csrf='';created=[];created_media=[];passed=0
 
@@ -13,6 +14,11 @@ def request(path,method='GET',data=None,headers=None):
 def j(path,method='GET',data=None):
  status,headers,raw=request('/api/'+path,method,data)
  return status,json.loads(raw)
+class MetaParser(HTMLParser):
+ def __init__(self):super().__init__();self.meta={}
+ def handle_starttag(self,tag,attrs):
+  if tag=='meta':
+   attrs=dict(attrs);self.meta[attrs.get('name',attrs.get('property',''))]=attrs.get('content','')
 def check(condition,label):
  global passed
  assert condition,label
@@ -67,7 +73,7 @@ try:
  evil=io.BytesIO()
  with zipfile.ZipFile(evil,'w') as z:z.writestr('../evil.php','x')
  payload,h=multipart({},'evil.zip',evil.getvalue(),'application/zip');status,headers,raw=request('/api/projects/import','POST',payload,h);check(status==400,'ZIP traversal rejected')
- status,headers,raw=request('/');check("'unsafe-eval'" not in headers.get('Content-Security-Policy',''),'strict application CSP');status,headers,raw=request('/sandbox/');check('sandbox allow-scripts;' in headers['Content-Security-Policy'] and 'allow-same-origin' not in headers['Content-Security-Policy'],'opaque sandbox CSP')
+ status,headers,raw=request('/');meta=MetaParser();meta.feed(raw.decode());public=j('settings/public')[1]['data'];check(meta.meta.get('description')==public['seo_description'] and meta.meta.get('og:description')==public['seo_description'],'global SEO settings rendered in HTML');check("'unsafe-eval'" not in headers.get('Content-Security-Policy',''),'strict application CSP');status,headers,raw=request('/sandbox/');check('sandbox allow-scripts;' in headers['Content-Security-Policy'] and 'allow-same-origin' not in headers['Content-Security-Policy'],'opaque sandbox CSP')
  status,headers,raw=request('/docs/ADMIN_CREDS.md');check(status in (403,404),'private credential not publicly served')
  check(os.stat('docs/ADMIN_CREDS.md').st_mode&0o777==0o600,'admin credential permissions')
  check(all(os.stat(x).st_uid==33 for x in pathlib.Path('html').rglob('*') if x.is_file()),'public files owned by www-data')

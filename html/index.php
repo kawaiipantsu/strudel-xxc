@@ -20,19 +20,19 @@ $html = preg_replace_callback(
     1,
 );
 $html = preg_replace_callback(
-    '~<meta name="description" content="[^"]*">~',
+    '~<meta\s+name="description"\s+content="[^"]*"\s*/?>~',
     fn() => '<meta name="description" content="' . $description . '">',
     $html,
     1,
 );
 $html = preg_replace_callback(
-    '~<meta property="og:title" content="[^"]*">~',
+    '~<meta\s+property="og:title"\s+content="[^"]*"\s*/?>~',
     fn() => '<meta property="og:title" content="' . $title . '">',
     $html,
     1,
 );
 $html = preg_replace_callback(
-    '~<meta property="og:description" content="[^"]*">~',
+    '~<meta\s+property="og:description"\s+content="[^"]*"\s*/?>~',
     fn() => '<meta property="og:description" content="' . $description . '">',
     $html,
     1,

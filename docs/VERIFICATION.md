@@ -13,7 +13,7 @@ Test command: `./scripts/test.sh`
 | TypeScript check and production Vite build | Pass |
 | PHP syntax checks for backend, public entry points and scripts | Pass |
 | PCM editing/encoding unit tests | 4 passed |
-| HTTPS backend integration checks | 50 passed |
+| HTTPS backend integration checks | 51 passed |
 | Browser end-to-end tests | 14 passed, 7 each in Chromium and WebKit |
 | `npm audit --omit=dev` | 0 vulnerabilities reported |
 | Database, Redis, storage, FFmpeg and SVG renderer health | Ready |
