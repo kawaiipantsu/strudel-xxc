@@ -19,7 +19,7 @@ PHP 8.4 with PDO MySQL, Redis, fileinfo, GD, ZIP, mbstring, JSON and sessions; M
 
 Allow approximately 3 GB for system samples and at least 2 GiB additional free storage. On an existing checkout upgrading to the sample-bank build, run `python3 scripts/install-sample-banks.py` once before building.
 
-Optional operator-supplied VJ packs go under `assets/vjloops/` and stay outside Git. Initial setup imports them if present. For later additions, run `python3 scripts/install-vjloops.py` before building. The installed three packs contain 146 clips, all normalized to bounded 720p H.264 without audio. Originals are retained. See [VJ Loops](VJ_LOOPS.md) for separate media backups and disk requirements.
+Optional operator-supplied VJ packs go under `assets/vjloops/` and stay outside Git. Initial setup imports them if present. For later additions, run `python3 scripts/install-vjloops.py` before building. Imports preserve already installed clips when upload staging has been cleaned up. The installed three packs contain 146 clips, all normalized to bounded 720p H.264 without audio; their redundant source uploads were removed at the operator's request. Restore `storage/vjloops/` from a separate media backup on a new server. See [VJ Loops](VJ_LOOPS.md) for details and disk requirements.
 
 The font TTF and original SVG source are committed in `public/`, so future graphics builds do not require a font download. npm downloads are pinned by `package-lock.json`.
 

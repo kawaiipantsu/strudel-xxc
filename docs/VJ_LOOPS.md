@@ -35,7 +35,9 @@ Play does not save or alter the project. Stop destroys its isolated runtime; Pla
 
 ## Local import and updates
 
-The original packs are in `assets/vjloops/pack1`, `pack2` and `pack3`, outside the web root. They are explicitly ignored by Git. Keep these originals in a separate media backup.
+Place new packs in `assets/vjloops/{pack-name}/`, outside the web root and Git. This is upload staging: the importer adds clips to the installed library and retains existing clips whose originals have been removed. Reimporting identical content does not duplicate it. Removing a staging file does not remove its installed clip.
+
+On 2026-10-02, at the operator's request, the 146 original uploads were removed after verifying their source hashes and the separate installed video hashes. This reclaimed **4,592,546,561 bytes** (4.59 GB / 4.28 GiB). All 146 browser copies and their thumbnails remain installed. The README banner, screenshots and supplied Pack 1 notice were retained.
 
 ```bash
 python3 scripts/install-vjloops.py
@@ -46,9 +48,11 @@ npx playwright test tests/e2e/vjloops.spec.ts
 
 The importer hashes and inspects local `.mp4` and `.mov` files with FFprobe. Every clip is normalized to 8-bit 4:2:0 H.264 MP4 at no more than 1280 pixels wide, using FFmpeg, CRF 24 and a 3 Mb/s video-rate cap. Prepared clips have fast-start metadata and no audio track. Full-range color is retained where present.
 
-The first import reused 88 original MP4s, but some stalled near the first frame in WebKit despite valid codec metadata. A bare video element reproduced the problem, and normalization fixed playback. All **146 clips** now use the same browser encoding. Original files total approximately 4.6 GB and remain intact; the browser copies are much smaller.
+The first import reused 88 original MP4s, but some stalled near the first frame in WebKit despite valid codec metadata. A bare video element reproduced the problem, and normalization fixed playback. All **146 clips** now use the same browser encoding.
 
-The installed browser copies total **302,776,942 bytes**. The host has approximately 2.1 GiB free after normalization, including the protected 2 GiB reserve. Adding larger packs or long recordings will require more disk space.
+The installed browser copies total **302,776,942 bytes**. Immediately after removing redundant uploads, the host had approximately **6.38 GiB** free, including the protected 2 GiB reserve. Disk availability changes with other host activity.
+
+Back up the entire `storage/vjloops/` directory, including its inventory, thumbnails, metadata and notices. These installed copies are now the deployment's media originals for recovery; Git does not contain the videos. A new server needs this backup or another import of the source packs. Keep any future high-resolution originals separately if you need to re-encode them later. The importer itself never deletes uploads.
 
 Conversions preserve a 2 GiB application reserve plus the estimated bounded output size and temporary overhead. Check disk space before adding more packs. Run the importer after changing packs. Hashes and the prepared-format recipe determine media identifiers. The byte-hash query in each public URL changes when an encoding is replaced, so browsers request the new copy. Existing project uploads are untouched.
 
@@ -60,6 +64,7 @@ The normal build runs `python3 scripts/install-vjloops.py --check`: it verifies 
 - `storage/vjloops/thumb/`: generated JPEG thumbnails.
 - `storage/vjloops/metadata/`: MIME, size and ETag allowlist.
 - `storage/vjloops/installed.json`: private import inventory and original filenames.
+- `storage/vjloops/notices/`: retained pack attribution and license notices.
 - `public/vjloops/catalog.json` → `html/vjloops/catalog.json`: public display names and opaque media URLs.
 - `/vjloops/video/{id}.mp4` and `/vjloops/thumb/{id}.jpg`: read-only PHP delivery with byte ranges and immutable caching. URLs include the prepared-byte hash as a version query, so refreshed encodings do not reuse a stale browser cache entry.
 
@@ -69,6 +74,6 @@ Both original and generated media are ignored by Git. Only the importer, deliver
 
 ## Attribution
 
-Pack 1 is credited to **Beeple**. Its supplied README permits commercial and noncommercial reuse and invites attribution. That original notice remains beside the private source files. [Beeple's VJ channel](https://vimeo.com/channels/beeple) and [artist website](https://www.beeple-crap.com/) identify the source; contact details are not copied into the repository.
+Pack 1 is credited to **Beeple**. Its supplied README permits commercial and noncommercial reuse and invites attribution. The original notice remains in `assets/vjloops/pack1/README.txt`, with a backup at `storage/vjloops/notices/pack1/README.txt`. [Beeple's VJ channel](https://vimeo.com/channels/beeple) and [artist website](https://www.beeple-crap.com/) identify the source; contact details are not copied into the repository.
 
 Packs 2 and 3 were supplied by the operator without accompanying license notices. They are documented as operator-supplied collections; the application does not assign them an AGPL or Creative Commons license. The media itself is excluded from the public source repository.

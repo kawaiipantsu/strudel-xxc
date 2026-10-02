@@ -2,6 +2,7 @@
 """Import operator-supplied VJ packs outside the web root. No media enters Git.
 
 All clips are normalized to bounded 720p H.264 without audio, preserving source files.
+Imports retain installed clips even after their original uploads have been removed.
 --check validates installed files and regenerates only the public catalogue.
 """
 import argparse, hashlib, json, os, grp, subprocess, tempfile, shutil
@@ -57,13 +58,10 @@ def main():
     import fcntl
     with (STORE/'.install.lock').open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        clips = []
         index_path = STORE/'installed.json'
         old = json.loads(index_path.read_text()) if index_path.exists() else []
         known = {x['id']: x for x in old}
-        if args.check:
-            clips = old
-        else:
+        if not args.check:
             files = sorted(p for p in SOURCE.rglob('*') if p.is_file() and not p.is_symlink() and p.suffix.lower() in ['.mp4', '.mov'])
             for i, source in enumerate(files):
                 if SOURCE.resolve() not in source.resolve().parents: raise ValueError('Unexpected source path')
@@ -71,7 +69,7 @@ def main():
                 clip_id = hashlib.sha256((original_sha+RECIPE).encode()).hexdigest()
                 previous = known.get(clip_id)
                 if previous and (STORE/'video'/previous['file']).is_file() and (STORE/'thumb'/previous['thumb']).is_file() and digest(STORE/'video'/previous['file']) == previous['sha256'] and previous.get('encoding')=='web720-crf24-3m':
-                    clips.append(previous); continue
+                    continue
                 data = probe(source)
                 stream = next(s for s in data['streams'] if s['codec_type']=='video')
                 duration = float(data['format']['duration'])
@@ -101,13 +99,15 @@ def main():
                     pack=pack, duration=round(duration,3), width=video['width'], height=video['height'],
                     size=target.stat().st_size, sha256=digest(target), source_sha256=original_sha,
                     source=str(source.relative_to(SOURCE)), prepared='converted', encoding='web720-crf24-3m')
-                clips.append(clip)
                 write_json(STORE/'metadata'/(clip['file']+'.json'),dict(size=clip['size'],mime='video/mp4',etag=clip['sha256']))
                 write_json(STORE/'metadata'/(clip['thumb']+'.json'),dict(size=(STORE/'thumb'/clip['thumb']).stat().st_size,mime='image/jpeg',etag=digest(STORE/'thumb'/clip['thumb'])))
                 # Keep completed work resumable without publishing an incomplete catalogue.
                 known[clip_id]=clip
                 write_json(index_path,list(known.values()))
                 print(f'{i+1}/{len(files)} prepared: {pack} / {source.stem}',flush=True)
+        # Uploads are staging inputs, not the installed library's source of truth.
+        # Preserve existing order and include each content ID only once.
+        clips = list(known.values())
         public_clips=[]
         for clip in clips:
             video=STORE/'video'/clip['file']; thumb=STORE/'thumb'/clip['thumb']
@@ -123,6 +123,6 @@ def main():
         catalogue=dict(version=hashlib.sha256(json.dumps(public_clips,sort_keys=True).encode()).hexdigest()[:16],packs=packs,clips=public_clips)
         write_json(PUBLIC/'catalog.json',catalogue,False)
         write_json(index_path,clips)
-        print(f'Installed {len(clips)} clips / {len(packs)} packs; originals retained; media excluded from Git.')
+        print(f'Installed {len(clips)} clips / {len(packs)} packs; media excluded from Git.')
 
 if __name__=='__main__': main()

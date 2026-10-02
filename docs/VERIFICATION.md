@@ -23,6 +23,12 @@ Commands: `./scripts/build.sh` followed by `./scripts/test.sh`.
 
 The final browser suite completed in 5.7 minutes without retries against the deployed HTTPS origin. These results include Banks, share-page playback, cycle links, hidden video controls, stable live updates and all normalized VJ encodings. Browser automation uses Playwright 1.63.0. Linux WebKit does not reproduce every Safari/iOS hardware configuration.
 
+## Follow-up: uploaded asset cleanup
+
+Removed 146 redundant source videos from `assets/vjloops/` at the operator's request, reclaiming 4,592,546,561 bytes. Verified all original and installed SHA-256 hashes before deletion and retained all 146 separate playback files, thumbnails and attribution notices. The README banner and screenshots remain. A private deletion audit is stored under `storage/config-backups/`.
+
+The importer now retains installed clips when staging is missing or empty, including when another pack is added later. Three isolated regression tests pass: absent/empty staging, new-pack import without duplication, and failure on missing installed media without replacing the published catalogue. Both normal import and check mode preserved the deployed catalogue byte-for-byte after cleanup. The full production build, all 18 VJ HTTP/codec/permission checks and live health checks passed again. The frontend build is unchanged; browser and unrelated backend suites were not rerun for this filesystem/importer change.
+
 ## Default sounds and sample insertion
 
 The local catalogue contains 1,063 sound names and 6,325 distinct audio files. Every installed byte hash is checked against the committed audio lock. Browser tests run the supplied 909, piano, `misc` and external Dirt sample scores unchanged, measure nonzero output, and check for runtime errors. They test individual 909 voices, the TR909 alias, crackle, VCSL, mridangam and wavetables. Local-bank tests block the upstream sample hosts to verify that defaults work from this server.
@@ -47,7 +53,7 @@ All 146 supplied VJ clips are inspected as H.264 with 8-bit 4:2:0 video, no more
 
 Random playback exposed original MP4s that stalled near 0.1 seconds in WebKit, including `BEEPLE MANIFEST MONEY BURNING D` and `ARMY MARCHING A`. A bare video element reproduced the first failure; a normalized copy advanced beyond two seconds. The importer now normalizes all clips, including MP4 originals, and browser regressions exercise both affected clips explicitly.
 
-Browser network traces briefly consumed the media reserve during a full suite. Test artifacts now use `/tmp` on this host. The application's 2 GiB reserve remains enforced. Original videos and generated media remain outside Git and the public web root.
+Browser network traces briefly consumed the media reserve during a full suite. Test artifacts now use `/tmp` on this host. The application's 2 GiB reserve remains enforced. Installed videos remain outside Git and the public web root.
 
 ## Project player and VJ controls
 

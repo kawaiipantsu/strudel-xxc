@@ -13,7 +13,7 @@ git pull --ff-only
 
 On first installation or when the committed sample lock changes, run `python3 scripts/install-sample-banks.py` before building. The normal build verifies the installed hashes without downloading. Samples stay outside the web root and are not removed by cleanup. See [Sample banks](SAMPLE_BANKS.md).
 
-To add or change local VJ packs, run `python3 scripts/install-vjloops.py` before building. Normal builds only verify existing clips. Originals under `assets/vjloops/` and generated `storage/vjloops/` are outside Git; back them up separately. See [VJ Loops](VJ_LOOPS.md).
+To add local VJ packs, run `python3 scripts/install-vjloops.py` before building. Normal builds only verify existing clips. The importer retains installed clips after uploads in `assets/vjloops/` are removed; deleting a staging upload does not delete an installed clip. The initial source uploads were cleaned up after hash verification. Back up all of `storage/vjloops/` separately, since Git contains no media. See [VJ Loops](VJ_LOOPS.md).
 
 Run `./scripts/test.sh` for a complete verification. The build does not erase PHP entry points or runtime media. The service worker is versioned from active asset names and uses network-first requests. No release artifacts or GitHub Releases are needed for this web deployment.
 
