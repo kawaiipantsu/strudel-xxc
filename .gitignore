@@ -26,3 +26,5 @@ html/share.js
 html/manifest.webmanifest
 html/robots.txt
 html/pcm-worklet.js
+
+html/storage/

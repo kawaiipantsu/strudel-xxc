@@ -159,7 +159,7 @@ Hydra needs WebGL. MIDI needs browser support and an explicit connection in Cont
 
 ## Verification
 
-**14 browser tests · 51 backend checks · 4 audio utility tests passed.** The suite exercises actual signal output, captured PCM, codecs, permissions and sharing on the deployed HTTPS origin. See the [verification report](docs/VERIFICATION.md) for scope and hardware boundaries.
+**14 browser tests · 52 backend checks · 4 audio utility tests passed.** The suite exercises actual signal output, captured PCM, codecs, permissions and sharing on the deployed HTTPS origin. See the [verification report](docs/VERIFICATION.md) for scope and hardware boundaries.
 
 ## Documentation
 

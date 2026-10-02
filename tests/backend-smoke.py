@@ -78,6 +78,7 @@ try:
  check(os.stat('docs/ADMIN_CREDS.md').st_mode&0o777==0o600,'admin credential permissions')
  check(all(os.stat(x).st_uid==33 for x in pathlib.Path('html').rglob('*') if x.is_file()),'public files owned by www-data')
  check(not list(pathlib.Path('html').rglob('secrets.json')),'no public secrets')
+ check(not pathlib.Path('html/storage').exists(),'renderer cache remains outside web root')
  print(f'PASS {passed} backend checks')
 finally:
  # Copies produced by fork/import are also owned by this isolated session.

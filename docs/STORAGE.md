@@ -37,3 +37,5 @@ Import validates every path and size before reading source or staging individual
 Public directories/files: `www-data:www-data`, `0755`/`0644`. Storage directories/files: `www-data:www-data`, `0750`/`0640`. Private configuration: `root:www-data`, directory `0750`, secret file `0640`. Initial database setup output and administrator credential file: root-owned `0600`.
 
 Run `./scripts/permissions.sh` after deployment. Never set world-write permissions or expose `storage/` through an Apache alias.
+
+Cover rendering uses an absolute font cache path in `storage/cache/fontconfig`. A generated private font configuration lives briefly in `storage/tmp` and is removed after rendering. No renderer cache belongs in `html/`.

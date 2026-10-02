@@ -164,7 +164,19 @@ function make_cover(
     $svg .= "</svg>";
     $master = ROOT . "/storage/covers/" . $id . ".svg";
     $png = ROOT . "/storage/covers/" . $id . ".png";
+    $fontConfig = ROOT . "/storage/tmp/" . $id . ".fonts.conf";
     try {
+        $fontTemplate = file_get_contents(ROOT . "/backend/fonts.conf");
+        $fontSettings = str_replace(
+            ["{{FONT_DIRECTORY}}", "{{CACHE_DIRECTORY}}"],
+            [
+                esc(realpath(ROOT . "/public/fonts")),
+                esc(realpath(ROOT . "/storage/cache") . "/fontconfig"),
+            ],
+            $fontTemplate,
+        );
+        file_put_contents($fontConfig, $fontSettings, LOCK_EX);
+        chmod($fontConfig, 0640);
         file_put_contents($master, $svg, LOCK_EX);
         process(
             [
@@ -174,7 +186,7 @@ function make_cover(
                 $master,
             ],
             15,
-            ["FONTCONFIG_FILE" => ROOT . "/backend/fonts.conf"],
+            ["FONTCONFIG_FILE" => $fontConfig],
         );
         chmod($master, 0640);
         chmod($png, 0640);
@@ -208,5 +220,9 @@ function make_cover(
             unlink($png);
         }
         throw $e;
+    } finally {
+        if (is_file($fontConfig)) {
+            unlink($fontConfig);
+        }
     }
 }
