@@ -21,4 +21,4 @@ for category,title,body in posts:
  out=json.loads(subprocess.check_output(['gh','api','graphql','--input','-'],input=json.dumps(payload),text=True))
  if 'errors' in out:raise RuntimeError(str(out['errors']))
  url=out['data']['createDiscussion']['discussion']['url'];links.append((title,url));print(title+' → '+url)
-pathlib.Path('docs/COMMUNITY_THREADS.md').write_text('# Community starter discussions\n\nOpening topics created for real contributions; no fabricated replies or engagement metrics.\n\n'+'\n'.join('- ['+t+']('+u+')' for t,u in links)+'\n')
+pathlib.Path('docs/COMMUNITY_THREADS.md').write_text('# Community starter discussions\n\nStarting points for sharing scores, samples, questions and ideas.\n\n'+'\n'.join('- ['+t+']('+u+')' for t,u in links)+'\n')

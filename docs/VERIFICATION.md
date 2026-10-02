@@ -1,7 +1,9 @@
 # Deployment verification — 2026-10-02
 
-Application: **https://strudel.xxc.dk**  
-Frontend build: **ec1e863abf71**  
+Application: **https://strudel.xxc.dk**
+
+Frontend build: **ec1e863abf71**
+
 Test command: `./scripts/test.sh`
 
 ## Results
