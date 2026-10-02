@@ -5,6 +5,9 @@ export type ProjectFile = {
 };
 export type Project = {
   id?: string;
+  // Local editor identity before the server assigns a project id.
+  draft_id?: string;
+  draft_dirty?: boolean;
   title: string;
   description: string;
   author: string;

@@ -61,3 +61,15 @@ $: n("0 ~ 4 7 ~ 3 2 ~")
   ],
 };
 export const makeStarter = (): Project => structuredClone(starter);
+export const makeEmptyProject = (): Project => ({
+  draft_id: crypto.randomUUID(),
+  title: "Untitled project",
+  description: "",
+  author: "",
+  visibility: "private",
+  entry_file: "main.strudel",
+  files: [{ path: "main.strudel", kind: "file", content: "" }],
+  tags: [],
+  metadata: {},
+  editable: true,
+});

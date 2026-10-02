@@ -61,3 +61,11 @@ With the setting checked, the audio clock continues scheduling independently of 
 ## Social preview looks stale
 
 The default card uses `/brand/social-studio.png` with a visible Open Studio call to action. The root, library and project pages include the configured site title as `og:site_name`. PNG rendering uses librsvg and the bundled JetBrains Mono font to avoid the overlapping text produced by ImageMagick's internal SVG renderer. Older `/brand/social.png` references also receive the corrected image. Discord and other platforms may retain previews for previously shared URLs until their caches refresh.
+
+## Start without the demo files
+
+Click **New +** in the top bar. The studio saves local or edited work first, hushes playback, and opens an empty `main.strudel` file in its own private project. The command palette also has **Project: New empty workspace**. Saved work is accessible through the **Recent projects** folder button on the activity rail.
+
+New clears the library-link query parameters, so reloading stays in the new workspace. Editor tabs, closed-tab history, metadata and undo state are isolated from the previous project. On mobile it closes tool drawers so the blank editor is visible. Stop an active recording before starting another project.
+
+If the checkpoint fails, the existing workspace stays open with an error message. Restore the connection or resolve the save error and try New again; it does not discard unsaved work to continue.

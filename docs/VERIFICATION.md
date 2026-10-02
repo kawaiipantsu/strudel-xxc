@@ -2,7 +2,19 @@
 
 Application: **https://strudel.xxc.dk**
 
-Frontend build: **0dd550dc6dde**
+Frontend build: **05412c3f4917**
+
+## New empty workspace update
+
+The TypeScript check and production build pass. `npx playwright test tests/e2e/new-project.spec.ts tests/e2e/studio.spec.ts` passes **12 workflow tests**, six each in Chromium and WebKit.
+
+The new cases exercise a delayed save followed immediately by New, a blank editor with isolated undo state and a distinct project identity, save/reload without demo tabs, preservation of edits recovered from local storage, reopening the previous project through Recent projects, a mobile library deep link followed by New and reload, unchanged public score data, and a failed checkpoint leaving the current work intact. Existing playback, recording, themes, sample editing, sharing and project-save workflows also pass.
+
+Desktop and mobile layouts were visually inspected. New remains visible on a 390-pixel viewport. Health checks report the database, Redis, storage, FFmpeg and cover renderer ready.
+
+## Earlier complete verification
+
+The following full-system results were recorded for build **0dd550dc6dde**, before the New workspace update. The update changes frontend project handling only.
 
 Test command: `./scripts/test.sh`
 

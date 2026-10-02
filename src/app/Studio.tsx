@@ -41,7 +41,7 @@ import {
   Check,
 } from "lucide-react";
 import { api, initSession, download, mediaLink } from "./api";
-import { makeStarter } from "./examples";
+import { makeStarter, makeEmptyProject } from "./examples";
 import type { Project, ProjectFile, Signal } from "./types";
 import { emptySignal } from "./types";
 import { Modal } from "./Modal";
@@ -52,6 +52,7 @@ import { Library as LibraryView } from "../library/Library";
 import { RecordingPanel } from "./RecordingPanel";
 import "./studio.css";
 type Log = { time: string; type: string; text: string; line?: number };
+const projectKey = (p: Project) => p.id || p.draft_id || "draft";
 const storeRead = (key: string, fallback: any) => {
   try {
     return JSON.parse(localStorage.getItem(key) || "null") ?? fallback;
@@ -84,23 +85,24 @@ export function Studio() {
   const [project, setProject] = useState<Project>(() =>
       storeRead("xxc-draft", makeStarter()),
     ),
-    [active, setActive] = useState("main.strudel"),
-    [tabs, setTabs] = useState<string[]>([
-      "main.strudel",
-      "drums.strudel",
-      "ambient.strudel",
-      "visuals.strudel",
-    ]),
-    [pinned, setPinned] = useState<string[]>(["main.strudel"]),
+    [active, setActive] = useState(project.entry_file),
+    [tabs, setTabs] = useState<string[]>(() =>
+      project.files
+        .filter((f) => f.kind !== "folder")
+        .slice(0, 6)
+        .map((f) => f.path),
+    ),
+    [pinned, setPinned] = useState<string[]>([project.entry_file]),
     [closed, setClosed] = useState<string[]>([]),
     [expanded, setExpanded] = useState<string[]>(["samples"]),
     [search, setSearch] = useState("");
   const [modal, setModal] = useState(""),
+    [creatingProject, setCreatingProject] = useState(false),
     [palette, setPalette] = useState(""),
     [playing, setPlaying] = useState(false),
     [ready, setReady] = useState(false),
     [saveState, setSaveState] = useState("LOCAL DRAFT"),
-    [dirty, setDirty] = useState(false),
+    [dirty, setDirty] = useState(project.draft_dirty === true),
     [performanceMode, setPerformanceMode] = useState(false),
     [left, setLeft] = useState(innerWidth > 980),
     [right, setRight] = useState(innerWidth > 980),
@@ -202,6 +204,8 @@ export function Studio() {
     sessionReady = useRef(false),
     dirtyRef = useRef(false),
     editCount = useRef(0),
+    workspaceEpoch = useRef(0),
+    creatingProjectRef = useRef(false),
     savePromise = useRef<Promise<string> | null>(null),
     fileInput = useRef<HTMLInputElement>(null),
     layout = useRef<HTMLDivElement>(null),
@@ -244,7 +248,7 @@ export function Studio() {
         file: path,
         code: f.content,
         generation: generation.current,
-        projectKey: p.id || "draft",
+        projectKey: projectKey(p),
       });
     },
     [send],
@@ -262,11 +266,12 @@ export function Studio() {
   async function save(forceFork = false): Promise<string> {
     if (savePromise.current) return savePromise.current;
     savePromise.current = (async () => {
-      if (!sessionReady.current) await initSession();
       const p = structuredClone(proj.current),
-        revisionAtSave = editCount.current;
+        revisionAtSave = editCount.current,
+        epochAtSave = workspaceEpoch.current;
       setSaveState("SAVING…");
       try {
+        if (!sessionReady.current) await initSession();
         let saved: Project;
         if (p.id && p.editable !== false && !forceFork)
           saved = await api<Project>("projects/" + p.id, "PUT", p);
@@ -276,9 +281,11 @@ export function Studio() {
           delete p.version;
           saved = await api<Project>("projects", "POST", p);
         }
+        // An old save must never replace a newly opened workspace or its id.
+        if (epochAtSave !== workspaceEpoch.current) return saved.id!;
         if (editCount.current === revisionAtSave) {
           if (p.id !== saved.id)
-            send("project-key", { from: p.id || "draft", to: saved.id });
+            send("project-key", { from: projectKey(p), to: saved.id });
           const before = p.files.find(
             (f) => f.path === activeRef.current,
           )?.content;
@@ -289,22 +296,28 @@ export function Studio() {
           setProject(saved);
           proj.current = saved;
           setDirty(false);
+          dirtyRef.current = false;
           setSaveState("SAVED");
           localStorage.setItem("xxc-draft", JSON.stringify(saved));
         } else {
-          setProject((current) => ({
-            ...current,
+          if (p.id !== saved.id)
+            send("project-key", { from: projectKey(p), to: saved.id });
+          const current = {
+            ...proj.current,
             id: saved.id,
             version: saved.version,
             slug: saved.slug,
             editable: true,
-          }));
+          };
+          proj.current = current;
+          setProject(current);
+          dirtyRef.current = true;
           setSaveState("UNSAVED");
         }
         log("Project checkpoint saved.", "NETWORK");
         return saved.id!;
       } catch (e) {
-        setSaveState("LOCAL ONLY");
+        if (epochAtSave === workspaceEpoch.current) setSaveState("LOCAL ONLY");
         log(String(e), "PROBLEMS");
         throw e;
       } finally {
@@ -321,11 +334,27 @@ export function Studio() {
     return proj.current.id!;
   }
   async function openProject(p: Project) {
+    // Write the recoverable draft before replacing any visible state.
+    localStorage.setItem("xxc-draft", JSON.stringify(p));
+    workspaceEpoch.current++;
     send("stop");
     setProject(p);
     proj.current = p;
     setDirty(false);
-    setSaveState(p.editable === false ? "READ ONLY / REMIX TO SAVE" : "SAVED");
+    dirtyRef.current = false;
+    setSaveState(
+      p.editable === false
+        ? "READ ONLY / REMIX TO SAVE"
+        : p.id
+          ? "SAVED"
+          : "LOCAL DRAFT",
+    );
+    setPinned([p.entry_file]);
+    setClosed([]);
+    setSearch("");
+    setExpanded(p.files.filter((f) => f.kind === "folder").map((f) => f.path));
+    setContext(null);
+    signal.current = structuredClone(emptySignal);
     setTabs(
       p.files
         .filter((f) => f.kind !== "folder")
@@ -334,8 +363,53 @@ export function Studio() {
     );
     loadFile(p.entry_file, p);
     setModal("");
-    localStorage.setItem("xxc-draft", JSON.stringify(p));
     notice("Score opened. Press Play when you are ready.");
+  }
+  async function newProject() {
+    if (creatingProjectRef.current) return;
+    if (recordState !== "inactive") {
+      notice("Stop the recording before opening a new project.");
+      return;
+    }
+    creatingProjectRef.current = true;
+    setCreatingProject(true);
+    try {
+      // Finish a pending checkpoint before changing workspace identity.
+      if (savePromise.current) await savePromise.current;
+      // Read-only library scores and unchanged saved projects need no write.
+      // Save local/edited work so it remains available in Recent projects.
+      if (!proj.current.id || dirtyRef.current) await saveRef.current();
+      while (dirtyRef.current) await saveRef.current();
+      await openProject(makeEmptyProject());
+      setPerformanceMode(false);
+      if (innerWidth <= 980) {
+        setLeft(false);
+        setRight(false);
+      }
+      const url = new URL(location.href);
+      url.searchParams.delete("project");
+      url.searchParams.delete("fork");
+      history.replaceState(null, "", url.pathname + url.search + url.hash);
+      setOnboarding(false);
+      localStorage.setItem("xxc-onboarded", "1");
+      localStorage.removeItem("xxc-snippet");
+      send("command", { command: "focus", arg: 1 });
+      notice("Empty workspace ready. Write your first pattern.");
+    } catch (e) {
+      notice(
+        "Could not preserve the current project. Your workspace is unchanged. " +
+          String(e),
+      );
+    } finally {
+      creatingProjectRef.current = false;
+      setCreatingProject(false);
+    }
+  }
+  function openRecent() {
+    setModal("recent");
+    api<Project[]>("projects")
+      .then(setRecent)
+      .catch((e) => notice(e.message));
   }
   async function fork(p: Project) {
     try {
@@ -362,6 +436,7 @@ export function Studio() {
   };
   useEffect(() => {
     let alive = true;
+    const initialEpoch = workspaceEpoch.current;
     initSession()
       .then(async () => {
         sessionReady.current = true;
@@ -395,6 +470,12 @@ export function Studio() {
             (!initialPreferences.current.draft ? settings.default_project : "");
         if (id) {
           const p = await api<Project>("projects/" + id);
+          if (
+            !alive ||
+            creatingProjectRef.current ||
+            workspaceEpoch.current !== initialEpoch
+          )
+            return;
           if (params.has("fork")) await fork(p);
           else await openProject(p);
         }
@@ -481,7 +562,10 @@ export function Studio() {
     if (!dirty) return;
     const local = setTimeout(() => {
       try {
-        localStorage.setItem("xxc-draft", JSON.stringify(project));
+        localStorage.setItem(
+          "xxc-draft",
+          JSON.stringify({ ...project, draft_dirty: true }),
+        );
       } catch {
         log(
           "Local draft storage is full. Export a project backup.",
@@ -679,7 +763,10 @@ export function Studio() {
     window.addEventListener("keydown", f);
     const unload = (e: BeforeUnloadEvent) => {
       if (dirtyRef.current) {
-        localStorage.setItem("xxc-draft", JSON.stringify(proj.current));
+        localStorage.setItem(
+          "xxc-draft",
+          JSON.stringify({ ...proj.current, draft_dirty: true }),
+        );
         e.preventDefault();
         e.returnValue = "";
       }
@@ -870,28 +957,10 @@ export function Studio() {
       () => send("evaluate", { mode: "block" }),
     ],
     ["Project: Save", () => save().catch((e) => notice(e.message))],
-    [
-      "Project: New",
-      () => {
-        setConfirm({
-          text: "Start a new project? The current draft will be saved first.",
-          action: async () => {
-            await save();
-            await openProject(makeStarter());
-            setSaveState("LOCAL DRAFT");
-          },
-        });
-      },
-    ],
+    ["Project: New empty workspace", newProject],
     ["Project: Export / Share", () => setModal("share")],
     ["Project: Import", () => fileInput.current?.click()],
-    [
-      "Project: Recent projects",
-      () => {
-        api<Project[]>("projects").then(setRecent);
-        setModal("recent");
-      },
-    ],
+    ["Project: Recent projects", openRecent],
     ["Samples: Open Sample Lab", () => setModal("samples")],
     ["Visuals: Performance Mode", () => setPerformanceMode((p) => !p)],
     [
@@ -1114,6 +1183,16 @@ export function Studio() {
         </button>
         <div className="header-actions">
           <button
+            className="new-project-button"
+            title="New empty project — preserve current work"
+            aria-label="New project"
+            disabled={!ready || creatingProject || recordState !== "inactive"}
+            onClick={newProject}
+          >
+            {creatingProject ? "Creating…" : "New"}
+            <Plus size={15} />
+          </button>
+          <button
             className="icon"
             title="Toggle theme"
             aria-label="Toggle theme"
@@ -1302,6 +1381,7 @@ export function Studio() {
         <nav className="activity-rail" aria-label="Workspace panels">
           {[
             [Files, "Explorer", () => setLeft((x) => !x)],
+            [Folder, "Recent projects", openRecent],
             [Library, "Library", () => setModal("library")],
             [SlidersHorizontal, "Sample Lab", () => setModal("samples")],
             [History, "History", openHistory],
@@ -2005,7 +2085,23 @@ export function Studio() {
             <button
               className="list-row full-width"
               key={p.id}
-              onClick={() => api<Project>("projects/" + p.id).then(openProject)}
+              onClick={async () => {
+                try {
+                  if (savePromise.current) await savePromise.current;
+                  if (dirtyRef.current) await saveRef.current();
+                  await openProject(await api<Project>("projects/" + p.id));
+                  const url = new URL(location.href);
+                  url.searchParams.delete("project");
+                  url.searchParams.delete("fork");
+                  history.replaceState(
+                    null,
+                    "",
+                    url.pathname + url.search + url.hash,
+                  );
+                } catch (e) {
+                  notice(String(e));
+                }
+              }}
             >
               <span>{p.title}</span>
               <small>{p.updated_at}</small>

@@ -349,6 +349,14 @@ dialog::backdrop {
   color: var(--accent);
   background: #ff3b4708;
 }
+.new-project-button {
+  border-color: var(--accent);
+  color: var(--bright);
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+}
+.new-project-button:hover {
+  background: color-mix(in srgb, var(--accent) 22%, var(--panel));
+}
 .transport {
   height: 54px;
   flex-shrink: 0;
@@ -1850,7 +1858,7 @@ audio {
   .header-actions button {
     padding: 7px;
   }
-  .header-actions button.icon:nth-child(2) {
+  .header-actions button[aria-label="Performance mode"] {
     display: none;
   }
   .hide-small {

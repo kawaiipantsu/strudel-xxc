@@ -66,6 +66,8 @@ The visual language brings together [THUGS(red)](https://thugs.red), [XXC / WAF]
 5. **Ctrl/Cmd + S** saves. **Ctrl/Cmd + P** opens files; **Ctrl/Cmd + Shift + P** opens commands.
 6. Record a take, make a code cover, and publish through **Export / Share**.
 
+**Start empty:** click **New +** in the top bar. It preserves local or edited work, then opens a private **Untitled project** with one blank `main.strudel` file. Unchanged library scores stay untouched. Use the **Recent projects** folder button on the left to reopen saved work, or find **Project: New empty workspace** in the command palette. Click the project title to rename it.
+
 ```javascript
 setcps(120 / 60 / 4)
 
